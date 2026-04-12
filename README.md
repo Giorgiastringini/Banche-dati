@@ -67,16 +67,10 @@ Per replicare l’intero flusso di lavoro:
     USERNAME = "la_tua_email@esempio.com"
     PASSWORD = "la_tua_password"
     - Salva e chiudi il file
-
-3. Per evitare che Git tracci e pubblichi per errore le tue password su GitHub, devi istruirlo a ignorare il file config.py:
-    - Sempre nella directory principale del progetto, fai **clic destro** e seleziona **Nuovo file** (o *New File*).
-    - Chiama il file .gitignore (attenzione a non dimenticare il punto all'inizio) e premi invio.
-    - Apri il file e aggiungi la riga `config.py` per indicare a Git di ignorare questo file.
-    - Salva e chiudi il file. In questo modo Git ignorerà il file config.py.
-4. Aprire il file "Analisi dei Conflitti.qmd" ed eseguire sia lo script per l'installazione dei pacchetti necessari che 
+3. Aprire il file "Analisi dei Conflitti.qmd" ed eseguire sia lo script per l'installazione dei pacchetti necessari che 
    lo script di download per scaricare automaticamente tutti gli eventi 
    relativi all’Ucraina e salvarli in `data/raw/`.
-5. Eseguire lo script di data management per pulire, ordinare e salvare il dataset in `data/processed/`.
+4. Eseguire lo script di data management per pulire, ordinare e salvare il dataset in `data/processed/`.
 
 ## Licenza
 
