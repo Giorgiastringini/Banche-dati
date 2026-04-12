@@ -7,3 +7,122 @@ format:
     toc: true
     code-fold: true
 ---
+
+# Installazione dei pacchetti necessari
+Questo blocco assicura che tutti i pacchetti necessari siano installati nel sistema. In particolare, installiamo `requests` per le richieste HTTP, `pandas` per la manipolazione dei dati, e `openpyxl` per eventuali operazioni con file Excel. L'output è disabilitato per mantenere il notebook pulito. (Cliccare su Run Cell per eseguire questo blocco solo la prima volta o quando si aggiorna l'ambiente di lavoro). 
+
+```{bash}
+#| output: false
+pip install requests pandas openpyxl
+```
+
+# Download dei dati ACLED tramite API
+In questa sezione scarichiamo i dati relativi all'Ucraina tramite API. Il codice gestisce l'autenticazione, il download paginato dei dati, e salva il dataset completo nella cartella RAW. Il processo è ottimizzato per essere efficiente e robusto, con gestione degli errori e feedback in tempo reale sul progresso del download. (Cliccare su Run Cell per eseguire questo blocco e scaricare i dati. Assicurarsi di avere le credenziali corrette nel file `config.py`).
+
+```{python}
+import requests
+import pandas as pd
+import config
+import sys
+import time
+
+def get_token():
+    url = "https://acleddata.com/oauth/token"
+    payload = {'username': config.USERNAME, 'password': config.PASSWORD, 'grant_type': 'password', 'client_id': 'acled'}
+    r = requests.post(url, data=payload)
+    if r.status_code == 200:
+        return r.json()['access_token']
+    else:
+        raise Exception(f"Errore di autenticazione: {r.status_code}")
+
+try:
+    print("Richiedo autorizzazione...")
+    mio_token = get_token()
+    base_url = "https://acleddata.com/api/acled/read?_format=json"
+    headers = {"Authorization": f"Bearer {mio_token}"}
+
+    tutti_i_dati = []
+    pagina = 1
+    limite_per_pagina = 5000
+
+    print("Download in corso (si fermerà automaticamente alla fine dei dati)...")
+
+    while True:
+        params = {
+            "country": "Ukraine",
+            "event_date": "2022-01-01|2026-04-10",
+            "event_date_where": "BETWEEN",
+            "limit": limite_per_pagina,
+            "page": pagina
+        }
+
+        response = requests.get(base_url, params=params, headers=headers)
+        
+        if response.status_code == 200:
+            dati_ricevuti = response.json().get("data", [])
+            
+            # --- CONDIZIONE DI INTERRUZIONE IMMEDIATA ---
+            if not dati_ricevuti:
+                print(f"\nFine dei dati raggiunta alla pagina {pagina}.")
+                break
+                
+            tutti_i_dati.extend(dati_ricevuti)
+            
+            # Counter Dinamico sulla stessa riga
+            sys.stdout.write(f"\rEventi scaricati: {len(tutti_i_dati)} (Pagina {pagina})")
+            sys.stdout.flush()
+
+            # Se la pagina è "corta", significa che è l'ultima
+            if len(dati_ricevuti) < limite_per_pagina:
+                print(f"\nScaricata l'ultima pagina incompleta ({len(dati_ricevuti)} eventi).")
+                break
+            
+            pagina += 1
+            # Pausa minima per non farsi bloccare
+            time.sleep(0.2) 
+        else:
+            print(f"\nErrore alla pagina {pagina}: {response.status_code}")
+            break
+
+    # Creazione DataFrame e salvataggio
+    df_raw = pd.DataFrame(tutti_i_dati)
+    df_raw.to_csv("data/raw/acled_ukraine_raw.csv", index=False)
+    
+    print("-" * 30)
+    print(f"SUCCESS! Scaricati {len(df_raw)} eventi totali.")
+    print("-" * 30)
+
+except Exception as e:
+    print(f"\nErrore fatale: {e}")
+```
+
+# Data Wrangling e Ordinamento 
+In questa sezione puliamo e ordiniamo i dati per l'analisi successiva. In questo codice, convertiamo le date, ordiniamo i dati per data e ID, e ci assicuriamo che i numeri di vittime siano in formato numerico. Infine, salviamo il dataset pulito nella cartella PROCESSED.
+
+```{python}
+import pandas as pd
+
+# 1. Carichiamo il file dalla cartella RAW
+df = pd.read_csv("data/raw/acled_ukraine_raw.csv")
+
+# 2. Pulizia e Ordinamento (Data Wrangling)
+# Convertiamo la colonna event_date in formato data reale per Python
+df['event_date'] = pd.to_datetime(df['event_date'])
+
+# Ordiniamo il DataFrame per data (dalla più recente) e per ID
+# Questo lo rende un dataset "ordinato" per l'analisi temporale (Time-Series)
+df_ordinato = df.sort_values(by=['event_date', 'event_id_cnty'], ascending=[False, True])
+
+# 3. Gestione tipi di dato (Modulo 1)
+# Assicuriamoci che fatalities sia un numero per poter fare calcoli statistici
+df_ordinato['fatalities'] = pd.to_numeric(df_ordinato['fatalities'], errors='coerce').fillna(0)
+
+# Salviamo la versione "pulita" nella cartella PROCESSED per l'analisi successiva
+# Come suggerito nella struttura del repository professionale [cite: 469-471]
+df_ordinato.to_csv("data/processed/acled_ukraine_ordered.csv", index=False)
+
+print("DataFrame strutturato correttamente!")
+print(f"Dimensioni del dataset: {df_ordinato.shape[0]} righe e {df_ordinato.shape[1]} colonne [cite: 3436]")
+print("\nAnteprima dei dati ordinati:")
+print(df_ordinato[['event_date', 'event_type', 'location', 'fatalities']].head())
+```
