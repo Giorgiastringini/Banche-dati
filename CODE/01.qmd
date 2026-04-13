@@ -1,0 +1,9 @@
+---
+title: "Analisi del Conflitto in Ucraina"
+author: "Il nostro gruppo"
+date: today
+format: 
+  html:
+    toc: true
+    code-fold: true
+---
