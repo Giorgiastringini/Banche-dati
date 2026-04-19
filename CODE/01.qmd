@@ -1,9 +1,294 @@
 ---
-title: "Analisi del Conflitto in Ucraina"
-author: "Il nostro gruppo"
+title: "Analisi dei Flussi Migratori in Europa in Risposta alla Guerra in Ucraina"
+subtitle: "Un'Indagine Quantitativa Basata su Dati Panel"
+author: "Il Nostro Gruppo"
 date: today
-format: 
-  html:
+format:
+  pdf:
     toc: true
-    code-fold: true
+    toc-title: "Indice dei Contenuti"
+    number-sections: true
+    colorlinks: true
+    documentclass: article
+    papersize: a4
+    geometry:
+      - margin=2.5cm
+    header-includes:
+      - "\\usepackage{titling}"
+      - "\\pretitle{\\begin{center}\\huge\\bfseries}"
+      - "\\posttitle{\\end{center}\\vspace{0.5em}}"
+      - "\\preauthor{\\begin{center}\\large}"
+      - "\\postauthor{\\end{center}}"
+      - "\\predate{\\begin{center}\\large}"
+      - "\\postdate{\\end{center}\\vspace{1em}\\hrule}"
+      - "\\usepackage{booktabs}"
+      - "\\usepackage{longtable}"
+      - "\\usepackage{float}"
+      - "\\floatplacement{table}{H}"
 ---
+
+# Introduzione e fonte dei dati
+
+La presente ricerca si pone l'obiettivo di quantificare e analizzare l'impatto del conflitto russo-ucraino sui flussi migratori verso i paesi europei. Lo scoppio della guerra nel 2022 ha generato una delle più rapide e massicce crisi di sfollati dalla Seconda Guerra Mondiale. 
+Tuttavia, l'entità dei flussi verso le diverse nazioni europee non è stata omogenea.
+
+Per comprendere queste dinamiche, abbiamo costruito un dataset di tipo Panel che unisce la dimensione temporale (gli anni prima e dopo lo scoppio del conflitto) e quella spaziale (i diversi paesi di destinazione). La nostra analisi si fonda su tre pilastri teorici:
+
+- Il fattore di spinta (Push Factor): L'intensità della violenza nel paese di origine, misurata attraverso le vittime totali e civili.
+
+- Il fattore di attrito (Friction): La distanza geografica tra il paese d'origine e la potenziale destinazione.
+
+- Il fattore di attrazione (Pull Factor): Le condizioni economiche del paese ospitante, misurate tramite il PIL pro-capite.
+
+Attraverso l'integrazione di banche dati internazionali (UNHCR, HDX, World Bank e CEPII), questo documento illustra la preparazione dei dati, l'analisi statistica descrittiva e le basi per la successiva modellizzazione econometrica.
+
+In particolare, il nostro focus è sui flussi di rifugiati ucraini verso i paesi europei, con un'attenzione specifica alle dinamiche temporali e alle differenze tra le nazioni di destinazione.
+
+Con l'obiettivo di costruire un dataset robusto e completo, abbiamo selezionato le seguenti fonti di dati:
+
+1. **UNHCR**: Per i flussi di rifugiati ucraini.
+2. **HDX (ACLED)**: Per i dati sul conflitto (vittime e violenza politica).
+3. **World Bank**: Per il PIL pro-capite, indicatore di attrattività economica.
+4. **CEPII**: Per la distanza geografica tra le capitali.
+
+# Costruzione del Master Dataset
+## Costruzione dell'indicatore di intensità del conflitto (X1)
+
+Prima di procedere all'integrazione generale, è fondamentale costruire un indicatore solido per l'intensità del conflitto. Abbiamo estratto i dati dal database HDX (Humanitarian Data Exchange), che raccoglie gli eventi registrati dall'ACLED.
+
+Invece di aggregare tutti gli eventi, abbiamo isolato tre variabili distinte: le vittime totali (ferocia militare), le vittime civili (impatto diretto sulla popolazione) e gli eventi di protesta. Questa separazione è cruciale per evitare il double-counting (doppio conteggio) degli stessi eventi e per permettere di osservare quale specifica forma di violenza correli maggiormente con i flussi migratori.
+
+```{r setup}
+#| code-fold: true
+#| results: "hide"
+#| warning: false
+#| message: false
+ 
+# Assicurati di aver caricato tutte le librerie necessarie
+library(tidyverse)
+library(readr)
+library(here)
+library(readxl)
+library(knitr)
+library(kableExtra)
+```
+
+```{r data_processing}
+#| message: false
+# 1. Carichiamo i 3 file HDX separatamente
+hdx_pol <- read_csv(here("DATA/RAW/HDX - ukraine_hrp_political_violence.csv"))
+hdx_civ <- read_csv(here("DATA/RAW/HDX - ukraine_hrp_civilian_targeting.csv"))
+hdx_demo <- read_csv(here("DATA/RAW/HDX - ukraine_hrp_demonstration.csv"))
+
+# 2. Pulizia: Raggruppiamo per Anno e calcoliamo i totali per ciascun file
+df_pol <- hdx_pol %>%
+  group_by(Year) %>%
+  summarise(Total_Fatalities = sum(Fatalities, na.rm = TRUE))
+
+df_civ <- hdx_civ %>%
+  group_by(Year) %>%
+  summarise(Civilian_Fatalities = sum(Fatalities, na.rm = TRUE))
+
+df_demo <- hdx_demo %>%
+  group_by(Year) %>%
+  summarise(Protest_Events = sum(Events, na.rm = TRUE)) # Qui sommiamo gli 
+  #eventi, non ci sono fatalities
+
+# 3. Merging: Uniamo i tre dataset HDX in un unico blocco "Guerra" usando 
+# l'Anno come chiave
+df_x1_combined <- df_pol %>%
+  left_join(df_civ, by = "Year") %>%
+  left_join(df_demo, by = "Year") %>%
+  # Se in alcuni anni non ci sono dati per una categoria (es. no proteste),
+  # mettiamo 0 al posto di NA
+  mutate(across(everything(), ~replace_na(., 0)))
+# 4. Controlliamo se la cartella esiste, altrimenti la creiamo
+if(!dir.exists(here("DATA/PROCESSED"))) {
+  dir.create(here("DATA/PROCESSED"), recursive = TRUE)
+}
+
+# 5. Salviamo il Data Frame come file CSV
+write_csv(df_x1_combined, here("DATA/PROCESSED/hdx_combinato_X1.csv"))
+```
+
+Diamo un'occhiata al nuovo blocco HDX unito:
+```{r view_combined}
+print(df_x1_combined)
+```
+
+## Integrazione delle Fonti e Creazione del Master Dataset
+Per condurre un'analisi di regressione strutturata, i dati isolati nella fase precedente devono essere fusi in un'unica struttura a "pannello" (Panel Data). Il dataset risultante avrà come unità di osservazione la combinazione univoca di un Paese europeo e di un Anno solare.
+
+In questa fase filtriamo i dati globali dell'UNHCR trattenendo esclusivamente le rotte che originano in Ucraina e terminano nei principali **31** paesi dello spazio europeo presi in considerazione. Successivamente, uniamo i dati economici (trasformando le serie storiche della World Bank in formato long) e i dati geospaziali (le distanze lineari tra le capitali fornite dal CEPII).
+
+```{r integration}
+#| message: false
+#| warning: false
+
+# 1. Carichiamo i dati rimanenti
+# (Assicurati che i nomi dei file siano quelli corretti nella tua cartella)
+df_y_unhcr <- read_csv(here("DATA", "RAW", "UNHCR - persons_of_concern.csv"))
+df_x2_wb    <- read_csv(here("DATA", "RAW", 
+"World Bank - API_NY.GDP.PCAP.CD_DS2_en_csv_v2_245.csv"), skip = 4)
+df_x3_dist  <- read_excel(here("DATA", "RAW", "dist_cepii.xls"))
+
+# --- PULIZIA UNHCR (Variabile Dipendente Y) ---
+# Filtriamo i flussi che partono dall'Ucraina (Origin = UKR)
+clean_unhcr <- df_y_unhcr %>%
+  filter(`Country of Origin ISO` == "UKR") %>%
+  select(Year, 
+         iso3 = `Country of Asylum ISO`, 
+         Country = `Country of Asylum`, 
+         Refugees)
+
+# --- PULIZIA WORLD BANK (Variabile X2: PIL Pro-Capite) ---
+# Trasformiamo il formato "Wide" in "Long" (Anni in una colonna)
+clean_wb <- df_x2_wb %>%
+  select(`Country Code`, matches("^[0-9]{4}$")) %>% # Teniamo ISO e colonne anni
+  pivot_longer(cols = -`Country Code`, 
+               names_to = "Year", 
+               values_to = "GDP_per_capita") %>%
+  mutate(Year = as.numeric(Year)) %>%
+  rename(iso3 = `Country Code`)
+
+# --- PULIZIA CEPII (Variabile X3: Distanza) ---
+# Filtriamo la distanza tra Kyiv (UKR) e le altre capitali
+clean_dist <- df_x3_dist %>%
+  filter(iso_o == "UKR") %>%
+  select(iso3 = iso_d, Dist_km = distcap)
+
+# --- DEFINIZIONE TARGET EUROPA ---
+# Scegliamo i paesi UE principali per l'analisi
+eu_countries <- c("AUT", "BEL", "BGR", "HRV", "CYP", "CZE", 
+                 "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", 
+                 "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", 
+                 "ROU", "SVK", "SVN", "ESP", "SWE", "CHE", "NOR", 
+                 "GBR", "MDA")
+
+# --- MERGING FINALE ---
+# Uniamo tutto partendo dai flussi (UNHCR)
+master_data <- clean_unhcr %>%
+  filter(iso3 %in% eu_countries) %>%           # Solo Europa
+  left_join(df_x1_combined, by = "Year") %>%   # Aggiungiamo Guerra (X1)
+  left_join(clean_wb, by = c("iso3", "Year")) %>% # Aggiungiamo PIL (X2)
+  left_join(clean_dist, by = "iso3") %>%       # Aggiungiamo Distanza (X3)
+  arrange(Country, Year)
+
+# Salvataggio del dataset finale
+write_csv(master_data, here("DATA", "PROCESSED", "master_dataset_ukraine.csv"))
+
+# Visualizziamo le prime righe
+head(master_data)
+```
+
+## Definizione delle Variabili (Codebook)
+
+```{r setup_tables}
+#| message: false
+#| warning: false
+#| echo: false
+
+# Carichiamo le librerie per creare tabelle eleganti
+library(tidyverse)
+library(knitr)
+# install.packages("kableExtra") # Togli il commento se non lo hai installato
+library(kableExtra)
+# Creiamo il Codebook manualmente usando un Data Frame (Tibble)
+codebook <- tibble(
+  Variabile = c("Year", "iso3", "Country", "Refugees", "Total_Fatalities", 
+                "Civilian_Fatalities", "Protest_Events", "GDP_per_capita", 
+                "Dist_km"),
+  
+  Tipo = c("Temporale", "Categoriale", "Categoriale", "Numerica (Y)", "Numerica (X1a)", 
+           "Numerica (X1b)", "Numerica (X1c)", "Numerica (X2)", "Numerica (X3)"),
+  
+  Descrizione = c("Anno di osservazione (2010-2024)", 
+                  "Codice ISO 3166-1 alpha-3 del paese", 
+                  "Nome del paese europeo di destinazione", 
+                  "Numero di rifugiati/richiedenti asilo ucraini", 
+                  "Totale vittime (civili e militari) in Ucraina", 
+                  "Vittime esclusivamente civili in Ucraina", 
+                  "Numero di manifestazioni/proteste in Ucraina", 
+                  "PIL pro-capite del paese di destinazione (US$ correnti)", 
+                  "Distanza in km tra Kyiv e la capitale di destinazione"),
+  
+  Fonte = c("-", "Standard", "Standard", "UNHCR", "HDX (ACLED)", 
+            "HDX (ACLED)", "HDX (ACLED)", "World Bank", "CEPII")
+)
+
+# Stampiamo la tabella formattata
+# Esempio per il Codebook
+kable(codebook, format = "latex", caption = "Codebook del Master Dataset", booktabs = TRUE, label = NA) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position")) %>%
+  column_spec(3, width = "7cm")
+```
+
+# Analisi Statistica Descrittiva
+## Statistiche Descrittive Globali
+Analizzando i principali indicatori di tendenza centrale (media, mediana) e di dispersione (deviazione standard, range interquartile), emergono immediatamente le fortissime asimmetrie che caratterizzano il fenomeno migratorio e il contesto economico europeo. La media dei rifugiati è fortemente influenzata da pochi paesi di destinazione (es. Polonia, Germania), mentre la mediana è molto più bassa, indicando che la maggior parte dei paesi ha ricevuto flussi molto più contenuti. La deviazione standard elevata conferma questa eterogeneità. 
+Per quanto riguarda il conflitto, le vittime totali e civili mostrano picchi drammatici a partire dal 2022, con un IQR che evidenzia l'intensità crescente della guerra. Il PIL pro-capite e la distanza geografica presentano invece una distribuzione più stabile, sebbene con differenze significative tra i paesi europei. 
+Queste statistiche preliminari sottolineano l'importanza di considerare sia le caratteristiche del paese di origine (conflitto) che quelle del paese di destinazione (attrattività economica e distanza) per comprendere i flussi migratori in risposta alla crisi ucraina. 
+
+```{r summary_stats}
+#| echo: false
+#| warning: false
+#| message: false
+# Usiamo dplyr per calcolare Media, SD, Mediana, IQR, Min e Max
+stats_table <- master_data %>%
+  # Selezioniamo solo le variabili numeriche che ci interessano
+  select(Refugees, Total_Fatalities, Civilian_Fatalities, GDP_per_capita, Dist_km) %>%
+  # Trasformiamo i dati per poterli riepilogare tutti insieme
+  pivot_longer(everything(), names_to = "Variabile", values_to = "Valore") %>%
+  group_by(Variabile) %>%
+  summarise(
+    N_Validi = sum(!is.na(Valore)),
+    Media = mean(Valore, na.rm = TRUE),
+    Dev_Std = sd(Valore, na.rm = TRUE),
+    Minimo = min(Valore, na.rm = TRUE),
+    Q1 = quantile(Valore, 0.25, na.rm = TRUE),
+    Mediana = median(Valore, na.rm = TRUE),
+    Q3 = quantile(Valore, 0.75, na.rm = TRUE),
+    Massimo = max(Valore, na.rm = TRUE),
+    IQR = IQR(Valore, na.rm = TRUE)
+  ) %>%
+  # Arrotondiamo i numeri a 2 decimali per eleganza
+  mutate(across(where(is.numeric), ~round(., 2)))
+
+kable(stats_table, format = "latex", caption = "Statistiche Descrittive Globali", booktabs = TRUE, label = NA) %>%
+  kable_styling(latex_options = c("striped", "scale_down", "HOLD_position"))
+# Rimpicciolisce la tabella per farla entrare nella pagina 
+```
+
+## Evoluzione Temporale dei Flussi e del Conflitto (2018-2023)
+Per comprendere l'evoluzione temporale dei flussi migratori e del conflitto, abbiamo aggregato i dati a livello annuale. La tabella risultante mostra chiaramente l'impennata dei rifugiati a partire dal 2022, con un picco di oltre 5 milioni di persone che hanno cercato asilo nei paesi europei. Parallelamente, le vittime totali e civili in Ucraina hanno raggiunto livelli drammatici nello stesso periodo, confermando la stretta correlazione tra intensità del conflitto e flussi migratori.
+
+Il PIL pro-capite e la distanza geografica, sebbene non mostrino variazioni significative nel tempo, rimangono fattori chiave per spiegare le differenze nei flussi tra i paesi di destinazione. Questa analisi temporale evidenzia come la crisi ucraina abbia rappresentato un punto di svolta nei flussi migratori europei, sottolineando l'importanza di monitorare costantemente sia le dinamiche del conflitto che le condizioni dei paesi ospitanti per una gestione efficace della crisi umanitaria.
+
+```{r temporal_stats}
+#| echo: false
+#| warning: false
+#| message: false
+stats_by_year <- master_data %>%
+  filter(Year >= 2018 & Year <= 2023) %>%
+  group_by(Year) %>%
+  summarise(
+    Totale_Rifugiati_EU = sum(Refugees, na.rm = TRUE),
+    Media_per_Paese = mean(Refugees, na.rm = TRUE),
+    Max_in_un_Paese = max(Refugees, na.rm = TRUE),
+    Vittime_Guerra = max(Total_Fatalities, na.rm = TRUE) # Usiamo max perché il dato è uguale per tutti i paesi in quell'anno
+  ) %>%
+  mutate(across(where(is.numeric), ~round(., 0)))
+
+kable(stats_by_year, format = "latex", caption = "Evoluzione Temporale dei Flussi e del Conflitto (2018-2023)", booktabs = TRUE, label = NA) %>%
+  kable_styling(latex_options = c("striped", "scale_down", "HOLD_position"))
+```
+
+## Evidenze dal trend temporale
+La Tabella 3 espone in modo drammatico lo "shock esogeno" che alimenta la nostra ipotesi di ricerca. Nel periodo 2018-2021, la situazione è caratterizzata da una sostanziale latenza: le vittime totali del conflitto in Ucraina si mantengono nell'ordine delle centinaia (es. `r format(max(master_data$Total_Fatalities[master_data$Year == 2021], na.rm=TRUE), big.mark = ".")` nel 2021), e i flussi migratori verso l'Europa sono relativamente contenuti (media per paese intorno a 10.000 rifugiati). Tuttavia, a partire dal 2022, con l'escalation del conflitto, si osserva un'impennata senza precedenti: le vittime totali raggiungono quota `r format(max(master_data$Total_Fatalities[master_data$Year == 2022], na.rm=TRUE), big.mark = ".")`, Simultaneamente, e in perfetta sincronia, il carico medio di rifugiati per paese europeo subisce un'impennata, arrivando a una media di `r format(round(mean(master_data$Refugees[master_data$Year == 2022], na.rm=TRUE), 0), big.mark = ".")` rifugiati per nazione.
+
+Questo trend evidenzia chiaramente la forte correlazione tra l'intensità del conflitto e i flussi migratori, confermando l'ipotesi che la guerra rappresenti un fattore di spinta decisivo per la migrazione forzata.
+Inoltre, il picco del 2022 coincide con l'inizio dell'invasione su larga scala, sottolineando come eventi geopolitici di questa portata possano generare crisi umanitarie di dimensioni enormi in tempi molto rapidi. La successiva stabilizzazione dei flussi nel 2023, sebbene ancora elevata, suggerisce una possibile fase di adattamento e assorbimento da parte dei paesi europei, ma rimane fondamentale monitorare l'evoluzione del conflitto e le politiche migratorie per gestire efficacemente la situazione.
+ 
+Poi, è importante notare che la distribuzione dei rifugiati non è stata uniforme tra i paesi europei, con alcune nazioni (es. Polonia, Germania) che hanno ricevuto flussi molto più consistenti rispetto ad altre, evidenziando l'importanza di fattori di attrazione e attrito nella scelta della destinazione da parte dei migranti. 
+
+Questo trend temporale fornisce una base solida per la successiva applicazione di un modello OLS, che avrà il compito di stimare se l'intensità del conflitto (misurata dalle vittime) sia un predittore significativo dei flussi migratori, tenendo conto delle condizioni economiche e della distanza geografica.
