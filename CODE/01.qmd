@@ -58,7 +58,7 @@ Prima di procedere all'integrazione generale, è fondamentale costruire un indic
 
 Invece di aggregare tutti gli eventi, abbiamo isolato tre variabili distinte: le vittime totali (ferocia militare), le vittime civili (impatto diretto sulla popolazione) e gli eventi di protesta. Questa separazione è cruciale per evitare il double-counting (doppio conteggio) degli stessi eventi e per permettere di osservare quale specifica forma di violenza correli maggiormente con i flussi migratori.
 
-```{r setup}
+```{r setup_libreries}
 #| code-fold: true
 #| results: "hide"
 #| warning: false
@@ -73,7 +73,7 @@ library(knitr)
 library(kableExtra)
 ```
 
-```{r data_processing}
+```{r data_processing_HDX}
 #| message: false
 # 1. Carichiamo i 3 file HDX separatamente
 hdx_pol <- read_csv(here("DATA/RAW/HDX - ukraine_hrp_political_violence.csv"))
@@ -111,17 +111,7 @@ if(!dir.exists(here("DATA/PROCESSED"))) {
 write_csv(df_x1_combined, here("DATA/PROCESSED/hdx_combinato_X1.csv"))
 ```
 
-Diamo un'occhiata al nuovo blocco HDX unito:
-```{r view_combined}
-print(df_x1_combined)
-```
-
-## Integrazione delle Fonti e Creazione del Master Dataset
-Per condurre un'analisi di regressione strutturata, i dati isolati nella fase precedente devono essere fusi in un'unica struttura a "pannello" (Panel Data). Il dataset risultante avrà come unità di osservazione la combinazione univoca di un Paese europeo e di un Anno solare.
-
-In questa fase filtriamo i dati globali dell'UNHCR trattenendo esclusivamente le rotte che originano in Ucraina e terminano nei principali **31** paesi dello spazio europeo presi in considerazione. Successivamente, uniamo i dati economici (trasformando le serie storiche della World Bank in formato long) e i dati geospaziali (le distanze lineari tra le capitali fornite dal CEPII).
-
-```{r integration}
+```{r integration_WB_CEPII_UNHCR}
 #| message: false
 #| warning: false
 
@@ -180,6 +170,158 @@ write_csv(master_data, here("DATA", "PROCESSED", "master_dataset_ukraine.csv"))
 # Visualizziamo le prime righe
 head(master_data)
 ```
+
+```{r setup_macro_dataset1}
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(wbstats) 
+library(here)
+
+# 1. Definiamo gli indicatori
+indicatori_wb <- c(
+  crescita_pil = "NY.GDP.MKTP.KD.ZG",
+  inflazione = "FP.CPI.TOTL.ZG"
+)
+
+# 2. Estraiamo i 31 paesi dal master_data e aggiungiamo l'Ucraina
+# Nota: usiamo i codici ISO3 (es. "POL", "ROU", "UKR")
+paesi_target <- c(unique(master_data$iso3), "UKR")
+
+# 3. Scarichiamo i dati per TUTTI i paesi target
+macro_panel <- wb_data(
+  indicator = indicatori_wb,
+  country = paesi_target,
+  start_date = 2010,
+  end_date = 2024
+)
+
+# 4. Creiamo la variabile del periodo
+macro_panel <- macro_panel %>%
+  mutate(periodo = case_when(
+    date < 2010 ~ "Pre-crisi",
+    date >= 2014 & date < 2022 ~ "Pre-guerra",
+    date >= 2022 ~ "Post-guerra"
+  ))
+
+# 5. Salvataggio del file CSV
+write_csv(macro_panel, here("DATA/PROCESSED/macro_panel_completo.csv"))
+```
+
+```{r merge_datasets}
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(here)
+
+# 1. Prepariamo il Master Dataset: togliamo le proteste
+master_clean <- master_data %>%
+  select(-Protest_Events)
+
+# 2. Prepariamo il dataset Macro per l'unione
+# Rinominiamo le colonne per farle combaciare con il Master Dataset
+macro_to_merge <- macro_panel %>%
+  rename(
+    Year = date,
+    iso3 = iso3c
+  ) %>%
+  select(Year, iso3, crescita_pil, inflazione, periodo)
+
+# 3. Unione dei due dataset (Merge)
+# Usiamo full_join per non perdere i dati dell'Ucraina (che sono nel macro ma non nel master)
+final_integrated_dataset <- master_clean %>%
+  full_join(macro_to_merge, by = c("Year", "iso3")) %>%
+  # Riordiniamo per avere una visione chiara
+  arrange(iso3, Year)
+
+# 4. Salvataggio finale
+write_csv(final_integrated_dataset, here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+
+# Visualizziamo un'anteprima
+head(final_integrated_dataset)
+
+```
+
+## Integrazione delle Fonti e Creazione del Master Dataset
+Per condurre un'analisi di regressione strutturata, i dati isolati nella fase precedente devono essere fusi in un'unica struttura a "pannello" (Panel Data). Il dataset risultante avrà come unità di osservazione la combinazione univoca di un Paese europeo e di un Anno solare.
+
+In questa fase filtriamo i dati globali dell'UNHCR trattenendo esclusivamente le rotte che originano in Ucraina e terminano nei principali **31** paesi dello spazio europeo presi in considerazione. Successivamente, uniamo i dati economici (trasformando le serie storiche della World Bank in formato long) e i dati geospaziali (le distanze lineari tra le capitali fornite dal CEPII).
+
+```{r setup_macro_dataset2}
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(wbstats) 
+library(here)
+
+# 1. Definiamo gli indicatori
+indicatori_wb <- c(
+  crescita_pil = "NY.GDP.MKTP.KD.ZG",
+  inflazione = "FP.CPI.TOTL.ZG"
+)
+
+# 2. Estraiamo i 31 paesi dal master_data e aggiungiamo l'Ucraina
+# Nota: usiamo i codici ISO3 (es. "POL", "ROU", "UKR")
+paesi_target <- c(unique(master_data$iso3), "UKR")
+
+# 3. Scarichiamo i dati per TUTTI i paesi target
+macro_panel <- wb_data(
+  indicator = indicatori_wb,
+  country = paesi_target,
+  start_date = 2010,
+  end_date = 2024
+)
+
+# 4. Creiamo la variabile del periodo
+macro_panel <- macro_panel %>%
+  mutate(periodo = case_when(
+    date < 2010 ~ "Pre-crisi",
+    date >= 2014 & date < 2022 ~ "Pre-guerra",
+    date >= 2022 ~ "Post-guerra"
+  ))
+
+# 5. Salvataggio del file CSV
+write_csv(macro_panel, here("DATA/PROCESSED/macro_panel_completo.csv"))
+```
+
+```{r merge_dataset1_dataset2}
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(here)
+
+# 1. Prepariamo il Master Dataset: togliamo le proteste
+master_clean <- master_data %>%
+  select(-Protest_Events)
+
+# 2. Prepariamo il dataset Macro per l'unione
+# Rinominiamo le colonne per farle combaciare con il Master Dataset
+macro_to_merge <- macro_panel %>%
+  rename(
+    Year = date,
+    iso3 = iso3c
+  ) %>%
+  select(Year, iso3, crescita_pil, inflazione, periodo)
+
+# 3. Unione dei due dataset (Merge)
+# Usiamo full_join per non perdere i dati dell'Ucraina (che sono nel macro ma non nel master)
+final_integrated_dataset <- master_clean %>%
+  full_join(macro_to_merge, by = c("Year", "iso3")) %>%
+  # Riordiniamo per avere una visione chiara
+  arrange(iso3, Year)
+
+# 4. Salvataggio finale
+write_csv(final_integrated_dataset, here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+
+# Visualizziamo un'anteprima
+head(final_integrated_dataset)
+
+```
+
 
 ## Definizione delle Variabili (Codebook)
 
@@ -292,3 +434,256 @@ Inoltre, il picco del 2022 coincide con l'inizio dell'invasione su larga scala, 
 Poi, è importante notare che la distribuzione dei rifugiati non è stata uniforme tra i paesi europei, con alcune nazioni (es. Polonia, Germania) che hanno ricevuto flussi molto più consistenti rispetto ad altre, evidenziando l'importanza di fattori di attrazione e attrito nella scelta della destinazione da parte dei migranti. 
 
 Questo trend temporale fornisce una base solida per la successiva applicazione di un modello OLS, che avrà il compito di stimare se l'intensità del conflitto (misurata dalle vittime) sia un predittore significativo dei flussi migratori, tenendo conto delle condizioni economiche e della distanza geografica.
+
+## Analisi Grafica e Visualizzazione Spaziale
+
+Per vedere meglio le evidenze emerse dalle statistiche descrittive, procediamo con una visualizzazione grafica delle principali dinamiche temporali e spaziali del nostro dataset. 
+
+*Nota metodologica:* A causa della natura fortemente asimmetrica dei flussi migratori (con paesi confinanti come la Polonia che assorbono ordini di grandezza superiori rispetto a nazioni periferiche), nei grafici seguenti utilizzeremo la **scala logaritmica** per l'asse delle ordinate (Rifugiati). Questo ci permette di visualizzare in modo chiaro sia i grandi che i piccoli flussi all'interno dello stesso grafico senza "schiacciare" i dati.
+
+### 4.1 Lo Shock Temporale: Il trend dei flussi
+
+### 4.1 Lo Shock Temporale: Il trend dei flussi
+
+Il primo passo è visualizzare l'andamento dei flussi di rifugiati ucraini verso i principali paesi europei nel periodo 2010-2024. Per rendere l'analisi più significativa, abbiamo selezionato un campione strategico di 7 nazioni che rappresentano tre gruppi distinti:
+
+* **Gruppo 1: I Paesi di Primo Approdo (Fattore "Friction" - Distanza).**
+>    * *Polonia e Romania:* Essendo confinanti, rappresentano l'urto iniziale e la pressione spaziale della guerra.
+* **Gruppo 2: I Poli di Attrazione (Fattore "Pull" - PIL).**
+>    * *Germania e Cechia:* Pur non confinanti, possiedono economie robuste. Dimostrano come il flusso si riorganizzi verso i paesi più ricchi dopo la fuga iniziale.
+* **Gruppo 3: L'Europa Periferica (Gruppo di Controllo).**
+>    * *Italia, Francia, Spagna:* Nazioni distanti geograficamente. Ci permettono di osservare come l'onda migratoria si "diluisca" sulle lunghe distanze.
+
+```{r plot_trend}
+#| label: fig-trend
+#| fig-cap: "Andamento dei flussi di rifugiati ucraini (2010-2024)."
+#| fig-pos: "H"
+#| fig-width: 8
+#| fig-height: 4.5
+#| out-width: "100%"
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+paesi_focus <- c("POL", "ROU", "DEU", "CZE", "ITA", "FRA", "ESP")
+
+master_data %>%
+  filter(iso3 %in% paesi_focus) %>%
+  mutate(iso3 = factor(iso3, levels = c("POL", "ROU", "DEU", "CZE", "ITA", "FRA", "ESP"))) %>%
+  ggplot(aes(x = Year, y = Refugees + 1, color = iso3)) +
+  geom_line(linewidth = 1.2, alpha = 0.9) +
+  
+  geom_vline(xintercept = 2021.8, linetype = "dashed", color = "#888888", linewidth = 0.8) +
+  annotate("text", x = 2021.9, y = 2000000, 
+           label = "Inizio Invasione", size = 4, color = "#555555", fontface = "italic", hjust = 0) +
+  
+  scale_y_log10(
+    breaks = c(1, 100, 10000, 1000000),
+    labels = c("0", "100", "10.000", "1.000.000"),
+    expand = expansion(mult = c(0, 0.3)) 
+  ) +
+  
+  # Usiamo la palette "Dark2": scientifica, categorica e a prova di daltonismo
+  scale_color_brewer(
+    palette = "Dark2",
+    labels = c("POL" = "Polonia", "ROU" = "Romania", "DEU" = "Germania", 
+               "CZE" = "Cechia", "ITA" = "Italia", "FRA" = "Francia", "ESP" = "Spagna")
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(), 
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank(),
+    # Riduciamo il margine della legenda per far respirare il grafico
+    legend.margin = margin(t = 0, unit = "cm") 
+  ) +
+  # Forza la legenda a stare su un'unica riga orizzontale se c'è spazio
+  guides(color = guide_legend(nrow = 1)) +
+  labs(
+    title = "Flussi di Rifugiati Ucraini verso l'Europa (2010-2025)",
+    subtitle = "Impatto dell'Invasione del 2022 su un campione strategico di 7 nazioni",
+    x = "Anno",
+    y = "Numero di Rifugiati (Scala Log10)"
+  )
+```
+
+**Evidenze dal grafico**: La Figura 1 mostra chiaramente l'effetto "shock esogeno" del 2022, con un'impennata drammatica dei flussi di rifugiati verso tutti i paesi, ma con differenze significative tra i gruppi. I paesi di primo approdo (Polonia e Romania) hanno subito un'ondata immediata e massiccia, confermando l'importanza della vicinanza geografica come fattore di attrito. I poli di attrazione (Germania e Cechia) hanno visto un aumento più graduale ma comunque significativo, suggerendo che l'attrattività economica ha giocato un ruolo chiave nella riorganizzazione dei flussi dopo la fuga iniziale. Infine, l'Europa periferica (Italia, Francia, Spagna) ha ricevuto flussi molto più contenuti, evidenziando come la distanza geografica abbia limitato l'accesso a queste destinazioni nonostante la crisi umanitaria. Questo grafico fornisce una base visiva solida per le successive analisi econometriche che cercheranno di quantificare l'effetto di questi fattori sui flussi migratori. 
+**Evidenze dal Grafico:**
+> Il grafico a linee (in scala logaritmica) conferma l'anomalia strutturale: fino al 2021 i flussi sono prossimi allo zero, mentre nel 2022 si registra un salto verticale simultaneo. Interessante notare come la Germania (verde) finisca per superare la Polonia (arancione), suggerendo visivamente che la forza economica (*Pull*) possa controbilanciare la distanza geografica (*Friction*). La Cechia (viola) segue un trend simile, sebbene con numeri più contenuti, mentre l'Italia, la Francia e la Spagna (grigi) rimangono molto più distanti, evidenziando l'effetto combinato di distanza e attrattività economica.
+
+### 4.2 L'Effetto "Gravità": Distanza geografica
+Il modello teorico della gravità applicato alle migrazioni suggerisce che, a parità di condizioni, i flussi diminuiscono all'aumentare della distanza. Isoliamo i dati del 2022 per verificare questa ipotesi.
+
+### 4.2 L'Effetto "Gravità": Distanza geografica
+
+Il modello teorico della gravità applicato alle migrazioni suggerisce che, a parità di condizioni, i flussi diminuiscono all'aumentare della distanza. Isoliamo i dati del 2022 per verificare questa ipotesi.
+
+```{r plot_scatter}
+#| label: fig-scatter
+#| fig-cap: "Relazione tra Distanza da Kyiv e Numero di Rifugiati (Anno 2022)."
+#| fig-pos: "H"
+#| fig-width: 8
+#| fig-height: 5
+#| out-width: "100%"
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(scales)
+library(ggrepel)
+library(dplyr)
+library(tidyr) # Ci serve per la funzione drop_na()
+
+master_data %>%
+  # 1. Pulizia: Togliamo chi ha 0 rifugiati (evita log di 0) 
+  filter(Year == 2022, Refugees > 0) %>%
+  # E togliamo eventuali righe con dati mancanti per evitare i Warning
+  drop_na(Dist_km, GDP_per_capita, Refugees) %>%
+  
+  ggplot(aes(x = Dist_km, y = Refugees)) +
+  
+  geom_smooth(method = "lm", se = FALSE, color = "#D55E00", linetype = "dashed", linewidth = 0.8) +
+  
+  # 2. Doppio mapping: Size E Fill dipendono entrambi dal PIL pro-capite
+  geom_point(aes(size = GDP_per_capita, fill = GDP_per_capita), 
+             shape = 21, color = "white", alpha = 0.9) +
+  
+  geom_text_repel(aes(label = iso3), 
+                  size = 3, color = "#333333",
+                  box.padding = 0.4, point.padding = 0.3, segment.color = "grey70") +
+  
+  # Formattazione assi pulita
+  scale_y_log10(labels = comma) +
+  scale_x_continuous(labels = comma) +
+  
+  # 3. Risoluzione errori formato numeri e unione legende
+  # Diamo a entrambe le scale lo STESSO nome così R le unisce in una sola legenda
+  scale_size_continuous(name = "PIL Pro-Capite:", 
+                        range = c(2, 10), 
+                        labels = dollar_format(prefix = "$", big.mark = ".", decimal.mark = ",")) +
+  
+  scale_fill_viridis_c(name = "PIL Pro-Capite:", 
+                       option = "plasma", # Palette che va dal viola scuro al giallo chiaro
+                       labels = dollar_format(prefix = "$", big.mark = ".", decimal.mark = ",")) +
+  
+  # Forziamo la legenda a combinare dimensione e colore nei pallini in basso
+  guides(fill = guide_legend(), size = guide_legend()) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(
+    title = "L'Effetto Gravità sulle Migrazioni (2022)",
+    subtitle = "I flussi diminuiscono con la distanza, ma i paesi ricchi attraggono di più",
+    x = "Distanza da Kyiv (km)", 
+    y = "Rifugiati (Scala Log10)"
+  )
+```
+
+**Evidenze dal grafico**: Osservazioni e Analisi dell'Effetto Gravità:
+
+La Figura 2 restituisce una fotografia estremamente ricca delle dinamiche migratorie nell'anno di scoppio del conflitto (2022). Grazie alla stratificazione visiva, possiamo osservare contemporaneamente l'interazione tra la variabile dipendente (Rifugiati) e due variabili indipendenti (Distanza e PIL). Dall'analisi del grafico emergono tre chiare evidenze empiriche:
+
+La validità del modello gravitazionale (Friction Factor):
+La linea tratteggiata arancione mostra la retta di regressione lineare (tendenza) che risulta chiaramente inclinata verso il basso. Questo conferma la "Legge di Gravità" delle migrazioni: all'aumentare della distanza da Kyiv sull'asse X, il volume assoluto dei flussi tende fisiologicamente a ridursi. Il caso della Polonia (POL) e della Moldavia (MDA), situate all'estrema sinistra del grafico, dimostra come la contiguità territoriale abbia generato un assorbimento primario e massiccio, indipendente dalla ricchezza di questi paesi (indicata dal colore scuro e dalla dimensione ridotta delle loro bolle). All'opposto, paesi periferici come il Portogallo (PRT), pur essendo mete sicure, accolgono numeri fisiologicamente inferiori a causa dell'estrema distanza.
+
+L'azione mitigatrice dell'economia (Pull Factor):
+L'aspetto più interessante del grafico risiede nei punti che si discostano fortemente (sopra o sotto) dalla retta di tendenza. Il PIL pro-capite, rappresentato sia dalla grandezza che dalla luminosità (verso il giallo) delle bolle, agisce come una forza di attrazione che "vince" l'attrito della distanza. L'esempio paradigmatico è la Germania (DEU): pur trovandosi a oltre 1.000 km di distanza (fascia centrale dell'asse X), registra un numero di rifugiati pari a quello polacco. Questo posizionamento anomalo verso l'alto è spiegato dalla forte attrattività del suo sistema economico e di welfare (bolla magenta, molto grande). Dinamiche simili si osservano per l'Irlanda (IRL) o la Svizzera (CHE): paesi distanti ma con bolle molto luminose (alto reddito) che si posizionano al di sopra della linea di tendenza.
+
+I limiti strutturali dell'accoglienza:
+Il grafico evidenzia anche dei casi limite, come il Lussemburgo (LUX). Pur vantando il PIL pro-capite più alto del campione (bolla gialla enorme in basso al centro), si posiziona molto al di sotto della retta di tendenza. Questo ci ricorda che, sebbene il reddito sia un forte magnete, i flussi in valori assoluti sono limitati dalla capacità demografica e territoriale intrinseca dei micro-stati.
+
+In sintesi, la dispersione dei dati suggerisce che i flussi iniziali seguono la via della minor resistenza (la vicinanza geografica), ma l'insediamento di medio periodo è fortemente distorto dalle opportunità economiche offerte dalle nazioni più ricche dell'Europa occidentale.
+
+### 4.3 Distribuzione geografica dei flussi: Mappa dei rifugiati per paese
+
+Infine, mappiamo la distribuzione spaziale per avere una chiara visione d'insieme dell'impatto sul continente europeo nell'anno di massima criticità.
+
+```{r plot_map}
+#| label: fig-map
+#| fig-cap: "Mappa coropletica della distribuzione dei rifugiati in Europa (2022)."
+#| fig-pos: "H"
+#| fig-width: 8
+#| fig-height: 7
+#| out-width: "100%"
+#| message: false
+#| warning: false
+
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+library(scales)
+
+# 1. Scarichiamo i confini dell'Europa
+europe <- ne_countries(scale = "medium", returnclass = "sf", continent = "Europe")
+
+# 2. Filtriamo i nostri dati per il 2022
+map_data_2022 <- master_data %>% filter(Year == 2022)
+
+# 3. Uniamo usando adm0_a3 (molto più affidabile di iso_a3 per i confini)
+europe_data <- europe %>% 
+  left_join(map_data_2022, by = c("adm0_a3" = "iso3"))
+
+# 4. Disegniamo la mappa
+ggplot(data = europe_data) +
+  # Livello 1: Sfondo per tutti i paesi europei (grigio chiaro)
+  geom_sf(fill = "#E8E8E8", color = "white", linewidth = 0.4) +
+  
+  # Livello 2: Coloriamo solo i paesi del nostro dataset con i rifugiati
+  geom_sf(aes(fill = Refugees), color = "white", linewidth = 0.5) +
+  
+  # Livello 3: Evidenziamo l'Ucraina come "Epicentro" (grigio scuro, bordo rosso)
+  geom_sf(data = europe_data %>% filter(adm0_a3 == "UKR"),
+          fill = "#555555", color = "#D55E00", linewidth = 0.8) +
+  geom_sf_text(data = europe_data %>% filter(adm0_a3 == "UKR"),
+               aes(label = "UKR"), color = "white", size = 3.5, fontface = "bold") +
+  
+  # Inquadratura allargata per includere Portogallo, Scandinavia e Cipro
+  coord_sf(xlim = c(-12, 45), ylim = c(34, 71), expand = FALSE) +
+  
+  # Scala colori "Plasma" con legenda orizzontale formattata
+  scale_fill_viridis_c(
+    option = "plasma", 
+    trans = "log10", 
+    labels = comma_format(big.mark = ".", decimal.mark = ","),
+    na.value = "transparent", # Lascia trasparire lo sfondo grigio
+    name = "Numero di Rifugiati (Scala Log10)",
+    guide = guide_colorbar(
+      direction = "horizontal",
+      barheight = unit(4, "mm"),
+      barwidth = unit(80, "mm"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  
+  # Tema mappa pulito
+  theme_void(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.margin = margin(t = 10, b = 10),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+    plot.subtitle = element_text(size = 11, hjust = 0.5, color = "#555555", margin = margin(b = 10))
+  ) +
+  labs(
+    title = "Geografia dell'Accoglienza in Europa (2022)",
+    subtitle = "Intensità dei flussi migratori. In grigio scuro l'epicentro del conflitto (UKR)."
+  )
+```
+
+**Evidenze dal grafico**: La mappa coropletica restituisce una visione d'insieme della "pressione" migratoria sul continente europeo, visualizzando l'impatto spaziale dello shock bellico attraverso una scala cromatica logaritmica. Dall'analisi visiva emergono tre dinamiche fondamentali che confermano le ipotesi di ricerca:L'effetto di prossimità (First Response):
+Il colore giallo acceso e arancio brillante che caratterizza i paesi immediatamente confinanti con l'epicentro del conflitto (evidenziato in grigio scuro con l'etichetta UKR) dimostra graficamente l'impatto della vicinanza. Paesi come la Polonia (POL) e la Romania (ROU) appaiono come i principali bacini di ricezione. Questo conferma il Friction Factor ($X_3$): la distanza fisica ridotta ha reso queste nazioni le mete naturali per la fuga immediata dei civili.L'attrattività dei Poli Economici (Secondary Movements):
+Un'evidenza di grande rilievo è la colorazione intensa della Germania (DEU) e della Repubblica Ceca (CZE). Sebbene non confinino direttamente con l'Ucraina, queste nazioni presentano livelli di accoglienza paragonabili (e nel tempo superiori) a quelli dei paesi di frontiera. Questo fenomeno visualizza l'effetto del Pull Factor ($X_2$): i rifugiati, dopo lo shock iniziale, tendono a spostarsi verso nazioni con un PIL pro-capite più elevato e maggiori opportunità di integrazione economica.La diluizione spaziale verso la periferia:
+Man mano che ci si sposta verso l'Europa occidentale e meridionale (Spagna, Francia, Italia, Grecia), i colori virano verso tonalità più scure (magenta e viola), indicando un numero di rifugiati in scala logaritmica inferiore. In queste aree, la grande distanza geografica ha agito da barriera naturale, limitando i flussi rispetto al cuore del continente.In conclusione, la Figura 3 non è solo una fotografia della crisi, ma la prova visiva dell'interazione tra guerra (spinta), geografia (barriera) ed economia (attrazione).
+
+
