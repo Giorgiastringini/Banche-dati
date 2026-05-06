@@ -1,0 +1,1045 @@
+---
+format:
+  beamer:
+    navigation: empty
+    header-includes: |
+      % --- DATI DOCUMENTO ---
+      \title{Analisi del conflitto in Ucraina}
+      \author{Gruppo H}
+      \date{04-05-2026}
+      \institute{Università di Bologna}
+
+      % --- PACCHETTI E COLORI ---
+      \usepackage{tikz}
+      \usepackage{tcolorbox}
+      \tcbuselibrary{skins}
+      \definecolor{beamer@main}{RGB}{168,41,37}
+      \setbeamercolor{structure}{fg=beamer@main}
+
+      % --- BANNER SUPERIORE ---
+      \setbeamertemplate{headline}{%
+        \begin{beamercolorbox}[wd=\paperwidth,ht=0.85cm]{}
+          \begin{tikzpicture}[remember picture,overlay]
+            \fill[beamer@main] (0,0) rectangle (\paperwidth,0.85cm);
+            \node[anchor=west,text=white,font=\small\bfseries] at (0.3cm,0.55cm) {Alma Mater Studiorum -- Università di Bologna};
+            \node[anchor=west,text=white,font=\scriptsize] at (0.3cm,0.2cm) {Dipartimento di Statistica};
+          \end{tikzpicture}
+        \end{beamercolorbox}
+      }
+
+      % --- BARRA INFERIORE (FOOTLINE) ---
+      \setbeamercolor{author in head/foot}{bg=beamer@main, fg=white}
+      \setbeamercolor{title in head/foot}{bg=gray!20, fg=black}
+      \setbeamercolor{date in head/foot}{bg=gray!10, fg=black}
+
+      \setbeamertemplate{footline}{%
+        \leavevmode%
+        \hbox{%
+        \begin{beamercolorbox}[wd=.33\paperwidth,ht=2.5ex,dp=1.5ex,leftskip=1em,center]{author in head/foot}%
+          \usebeamerfont{author in head/foot}\textbf{Gruppo H}
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.5ex,dp=1.5ex,center]{title in head/foot}%
+          \usebeamerfont{title in head/foot}Analisi Conflitto Ucraina
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=.33\paperwidth,ht=2.5ex,dp=1.5ex,rightskip=1em,center]{date in head/foot}%
+          \usebeamerfont{date in head/foot}04-05-2026 \hfill \insertframenumber{} / \inserttotalframenumber
+        \end{beamercolorbox}}%
+      }
+
+      % --- TEMPLATE TITLE PAGE ---
+      \setbeamertemplate{title page}{
+        \vspace{0.5cm}
+        \begin{center}
+          \begin{tcolorbox}[enhanced, colback=beamer@main, arc=3mm, boxrule=0pt, drop shadow, width=\textwidth, halign=center, top=6mm, bottom=6mm]
+            {\LARGE\bfseries\color{white}\inserttitle}
+          \end{tcolorbox}
+          \vspace{0.8cm}
+          {\large \insertauthor\par}
+          \vspace{0.4cm}
+          {\normalsize \insertinstitute\par}
+          \vspace{0.8cm}
+          {\large \insertdate\par}
+        \end{center}
+      }
+---
+
+## {state="plain"}
+
+\titlepage
+
+```{r setup_data}
+#| echo: false
+#| message: false
+#| warning: false
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(here)
+
+# Caricamento del dataset (Assicurati che il percorso sia corretto)
+master_data <- read_csv(here("DATA/PROCESSED/master_dataset_ukraine.csv"))
+df <- read_csv(here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+```
+
+---
+
+## Obiettivi e Domande della Ricerca
+
+Il nostro studio si è evoluto in tre direzioni complementari per analizzare lo shock del 2022:
+
+1. **Driver Migratori:**
+   Quali fattori (Violenza, Distanza, PIL) determinano la scelta del paese di destinazione, nell'ipotesi che i flussi partono a causa della guerra, si riversano sui confini per la gravità spaziale, ma si stabilizzano dove l'economia è più forte?
+
+2. **Shock Macroeconomico:**
+   Come hanno reagito l'inflazione e i tassi di disoccupazione europei all'afflusso massiccio di rifugiati?
+
+3. **Resilienza Economica e Confini:**
+   Esiste un differenziale di impatto sul PIL pro capite tra i paesi confinanti (prima linea) e i paesi non confinanti? Lo shock migratorio ha influenzato la crescita in modo asimmetrico? 
+
+---
+
+## Focus: Resilienza Economica e Confini
+
+La terza domanda di ricerca mira a isolare l'effetto "confine" sulla crescita economica:
+
+- **Asimmetria Geografica:** Analisi delle variazioni di PIL pro capite tra paesi limitrofi (es. Polonia, Romania, Moldavia) e il resto d'Europa.
+- **Correlazione con i Flussi:** Verificare se la magnitudo dell'afflusso migratorio post-febbraio 2022 ha agito come driver di spesa (stimolo fiscale) o come pressione sulle risorse.
+- **Ipotesi OLS:** Testare se, a parità di condizioni iniziali, la prossimità al conflitto ha generato traiettorie di PIL significativamente diverse.
+
+---
+
+## Metodologia: Integrazione dei Dataset
+
+Per rispondere a queste domande, abbiamo fuso due database eterogenei in un unico **Dataset Integrato**:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Fonti integrate:**
+
+- **Dataset Migratorio:** UNHCR (Flussi), ACLED (Vittime), CEPII (Distanze).
+- **Dataset Macro:** World Bank (PIL reale, Inflazione, Crescita %).
+:::
+
+::: {.column width="50%"}
+**Processo di Merging:**
+
+- **Chiavi Uniche:** Join su **ISO3** e **Anno**.
+- **Armonizzazione:** Conversione dei microdati bellici in aggregati annuali.
+- **Feature Selection:** Rimozione della variabile `Protest_Events`.
+- **Bilanciamento:** Gestione dei (NA) per garantire continuità nel Panel.
+:::
+
+::::
+
+---
+
+## Struttura del Master Dataset (Codebook)
+
+\textbf{Panel:} 32 Nazioni | 15 Anni (2010-2024) | Frequenza Annuale
+
+```{r codebook}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+codebook_data <- data.frame(
+  Categoria = c("Target (Y)", "Push (X1)", "Pull (X2)", "Friction (X3)", 
+                "Macro Shock", "Macro Shock", "Controllo", "Controllo"),
+  Variabile = c("Refugees", "Total_Fatalities", "GDP_per_capita", "Dist_km", 
+                "crescita_pil", "inflazione", "Periodo", "Confine"),
+  Descrizione = c("Flussi rifugiati ucraini", "Intensità conflitto (vittime)", 
+                  "Ricchezza paese destinaz.", "Distanza lineare da Kyiv", 
+                  "Variazione % PIL reale", "Variazione % prezzi",
+                  "Fasi: 2010-13, 14-21, 22-24", "Dummy contiguità (1/0)"),
+  Fonte = c("UNHCR", "ACLED", "World Bank", "CEPII", "World Bank", "World Bank", "-", "-")
+)
+
+kable(codebook_data, format = "latex", booktabs = TRUE) %>%
+  kable_styling(
+    latex_options = c("hold_position"),
+    font_size = 6
+  ) %>%
+  column_spec(1, bold = TRUE)
+```
+
+**Variabili di Controllo:**
+
+- `Periodo`: Pre-crisi (2010-13), Pre-guerra (2014-21), Post-guerra (2022-24).
+
+- `Confine`: Dummy variabile per identificare la contiguità geografica.
+
+---
+
+## Lo Shock del 2022: Statistiche Descrittive
+L'aggregazione temporale evidenzia il "salto" strutturale che giustifica l'uso della variabile $X_1$ (Vittime) come causa scatenante.
+
+```{r temporal_stats}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Usiamo il dataset definitivo
+# (Assicurati che 'df' o 'dataset_finale' sia caricato in memoria)
+stats_by_year <- df %>%
+  filter(Year >= 2018 & Year <= 2024) %>%
+  group_by(Year) %>%
+  summarise(
+    Tot_Rif = sum(Refugees, na.rm = TRUE),
+    Vittime = max(Total_Fatalities, na.rm = TRUE), # max perché è costante per anno
+    Infl_Media = mean(inflazione, na.rm = TRUE)
+  ) %>%
+  mutate(across(where(is.numeric), ~round(., 1)))
+
+# Tabella professionale con 4 colonne
+kable(stats_by_year, format = "latex", booktabs = TRUE, 
+      col.names = c("Anno", "Tot. Rifugiati", "Vittime Guerra", "Inflazione Media (%)")) %>%
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 8) %>%
+  # Evidenziamo la riga del 2022 (quarta riga se partiamo dal 2018)
+  row_spec(5, bold = TRUE, background = "#F2F2F2")
+```
+
+- **Rottura strutturale (2022)**: Si osserva la simultaneità dello shock. Le vittime passano da poche centinaia a oltre 40.000, i rifugiati superano i 4 milioni e l'inflazione media europea passa dal 3.1% all'11.1% (quasi 4 volte la media pre-guerra).
+
+---
+
+## Dinamica dei Flussi: Prima Linea vs Resto d'Europa
+
+```{r plot_trend_gruppi}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-align: "center"
+#| out-width: "85%"
+#| fig-height: 4.2
+
+library(tidyverse)
+library(scales)
+library(here)
+
+# Carichiamo il dataset unico
+df <- read_csv(here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+
+# Creiamo i gruppi e calcoliamo la SOMMA dei rifugiati
+df_flussi <- df %>%
+  filter(iso3 != "UKR") %>% # Escludiamo l'Ucraina (origine)
+  mutate(Gruppo = if_else(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"), 
+                          "Paesi Confinanti (Prima Linea)", 
+                          "Resto d'Europa (26 Nazioni)")) %>%
+  group_by(Year, Gruppo) %>%
+  summarise(Totale_Rifugiati = sum(Refugees, na.rm = TRUE), .groups = "drop")
+
+# Creiamo il grafico
+ggplot(df_flussi, aes(x = Year, y = Totale_Rifugiati + 1, color = Gruppo)) +
+  geom_line(linewidth = 1.3) +
+  geom_point(size = 2) +
+  
+  # Linea dell'invasione
+  geom_vline(xintercept = 2022, linetype = "dashed", color = "#888888", linewidth = 0.8) +
+  geom_label(aes(x = 2022, y = 11000000, label = "Inizio Guerra (2022)"),
+             size = 4.5, color = "black", fontface = "bold", fill = "white", label.size = 0.5) +
+  
+  # Scala Logaritmica
+  scale_y_log10(
+    breaks = c(1, 1000, 100000, 1000000, 10000000),
+    labels = c("0", "1.000", "100.000", "1 Milione", "10 Milioni"),
+    expand = expansion(mult = c(0, 0.2)) 
+  ) +
+  
+  # Colori coordinati con l'analisi macroeconomica successiva
+  scale_color_manual(values = c(
+    "Paesi Confinanti (Prima Linea)" = "#D55E00", 
+    "Resto d'Europa (26 Nazioni)" = "#0072B2"
+  )) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(), 
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(
+    title = "Volumi di Accoglienza: Il peso della Frontiera",
+    x = "Anno",
+    y = "Rifugiati Totali Accolti (Scala Log10)"
+  )
+```
+
+**Distribuzione del carico:** Sebbene il resto d'Europa (26 nazioni aggregate) accolga il numero assoluto maggiore di rifugiati, i soli 5 paesi di frontiera assorbono un volume impressionante e proporzionalmente enorme, a conferma del fortissimo "attrito geografico" nella primissima fase di fuga.
+
+---
+
+## L'Effetto Gravità: Distanza e PIL
+
+```{r plot_scatter}
+#| fig-pos: "H"
+#| fig-width: 8
+#| fig-height: 5
+#| out-width: "100%"
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(scales)
+library(ggrepel)
+library(dplyr)
+library(tidyr) # Ci serve per la funzione drop_na()
+
+master_data %>%
+  # 1. Pulizia: Togliamo chi ha 0 rifugiati (evita log di 0) 
+  filter(Year == 2022, Refugees > 0) %>%
+  # E togliamo eventuali righe con dati mancanti per evitare i Warning
+  drop_na(Dist_km, GDP_per_capita, Refugees) %>%
+  
+  ggplot(aes(x = Dist_km, y = Refugees)) +
+  
+  geom_smooth(method = "lm", se = FALSE, color = "#D55E00", linetype = "dashed", linewidth = 0.8) +
+  
+  # 2. Doppio mapping: Size E Fill dipendono entrambi dal PIL pro-capite
+  geom_point(aes(size = GDP_per_capita, fill = GDP_per_capita), 
+             shape = 21, color = "white", alpha = 0.9) +
+  
+  geom_text_repel(aes(label = iso3), 
+                  size = 3, color = "#333333",
+                  box.padding = 0.4, point.padding = 0.3, segment.color = "grey70") +
+  
+  # Formattazione assi pulita
+  scale_y_log10(labels = comma) +
+  scale_x_continuous(labels = comma) +
+  
+  # 3. Risoluzione errori formato numeri e unione legende
+  # Diamo a entrambe le scale lo STESSO nome così R le unisce in una sola legenda
+  scale_size_continuous(name = "PIL Pro-Capite:", 
+                        range = c(2, 10), 
+                        labels = dollar_format(prefix = "$", big.mark = ".", decimal.mark = ",")) +
+  
+  scale_fill_viridis_c(name = "PIL Pro-Capite:", 
+                       option = "plasma", # Palette che va dal viola scuro al giallo chiaro
+                       labels = dollar_format(prefix = "$", big.mark = ".", decimal.mark = ",")) +
+  
+  # Forziamo la legenda a combinare dimensione e colore nei pallini in basso
+  guides(fill = guide_legend(), size = guide_legend()) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(
+    title = "L'Effetto Gravità sulle Migrazioni (2022)",
+    subtitle = "I flussi diminuiscono con la distanza, ma i paesi ricchi attraggono di più",
+    x = "Distanza da Kyiv (km)", 
+    y = "Rifugiati (Scala Log10)"
+  )
+```
+
+---
+
+## Distribuzione geografica: Mappa dei rifugiati per paese
+
+:::: {.columns}
+
+::: {.column width="70%"}
+```{r plot_map}
+#| fig-pos: "H"
+#| fig-width: 8
+#| fig-height: 7
+#| out-width: "100%"
+#| message: false
+#| warning: false
+
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+library(scales)
+
+# 1. Scarichiamo i confini dell'Europa
+europe <- ne_countries(scale = "medium", returnclass = "sf", continent = "Europe")
+
+# 2. Filtriamo i nostri dati per il 2022
+map_data_2022 <- master_data %>% filter(Year == 2022)
+
+# 3. Uniamo usando adm0_a3 (molto più affidabile di iso_a3 per i confini)
+europe_data <- europe %>% 
+  left_join(map_data_2022, by = c("adm0_a3" = "iso3"))
+
+# 4. Disegniamo la mappa
+ggplot(data = europe_data) +
+  # Livello 1: Sfondo per tutti i paesi europei (grigio chiaro)
+  geom_sf(fill = "#E8E8E8", color = "white", linewidth = 0.4) +
+  
+  # Livello 2: Coloriamo solo i paesi del nostro dataset con i rifugiati
+  geom_sf(aes(fill = Refugees), color = "white", linewidth = 0.5) +
+  
+  # Livello 3: Evidenziamo l'Ucraina come "Epicentro" (grigio scuro, bordo rosso)
+  geom_sf(data = europe_data %>% filter(adm0_a3 == "UKR"),
+          fill = "#555555", color = "#D55E00", linewidth = 0.8) +
+  geom_sf_text(data = europe_data %>% filter(adm0_a3 == "UKR"),
+               aes(label = "UKR"), color = "white", size = 3.5, fontface = "bold") +
+  
+  # Inquadratura allargata per includere Portogallo, Scandinavia e Cipro
+  coord_sf(xlim = c(-12, 45), ylim = c(34, 71), expand = FALSE) +
+  
+  # Scala colori "Plasma" con legenda orizzontale formattata
+  scale_fill_viridis_c(
+    option = "plasma", 
+    trans = "log10", 
+    labels = comma_format(big.mark = ".", decimal.mark = ","),
+    na.value = "transparent", # Lascia trasparire lo sfondo grigio
+    name = "Numero di Rifugiati (Scala Log10)",
+    guide = guide_colorbar(
+      direction = "horizontal",
+      barheight = unit(4, "mm"),
+      barwidth = unit(80, "mm"),
+      title.position = "top",
+      title.hjust = 0.5
+    )
+  ) +
+  
+  # Tema mappa pulito
+  theme_void(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.margin = margin(t = 10, b = 10),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+    plot.subtitle = element_text(size = 11, hjust = 0.5, color = "#555555", margin = margin(b = 10)),
+  ) +
+  labs(
+    title = "Geografia dell'Accoglienza in Europa (2022)",
+    subtitle = "Intensità dei flussi migratori. In grigio scuro l'epicentro del conflitto (UKR)."
+  )
+```
+
+:::
+
+::: {.column width="35%"}
+- **Vicinanza**: Polonia e Romania hanno accolto i primi flussi per prossimità.
+
+- **Economia**: Germania e Cechia hanno attratto i flussi per ricchezza e welfare.
+
+- **Distanza**: Italia, Spagna e Francia hanno ricevuto meno flussi perché lontane.
+:::
+::::
+
+---
+
+## Lo Shock Macroeconomico: Dinamiche dell'Inflazione
+
+```{r plot_inflazione}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-align: "center"
+#| out-width: "85%"
+#| fig-width: 8
+#| fig-height: 4.2
+
+library(tidyverse)
+library(here)
+
+df <- read_csv(here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+
+# Calcoliamo la media dell'inflazione per i TRE gruppi (inclusa Ucraina)
+df_inflazione <- df %>%
+  filter(Year >= 2018) %>%
+  mutate(Gruppo = case_when(
+    iso3 == "UKR" ~ "Ucraina",
+    iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA") ~ "Paesi Confinanti (Prima Linea)", 
+    TRUE ~ "Resto d'Europa"
+  )) %>%
+  group_by(Year, Gruppo) %>%
+  summarise(Media_Inflazione = mean(inflazione, na.rm = TRUE), .groups = 'drop')
+
+# Creiamo il grafico
+ggplot(df_inflazione, aes(x = Year, y = Media_Inflazione, color = Gruppo)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_vline(xintercept = 2022, linetype = "dashed", color = "darkred", linewidth = 0.8) +
+  geom_vline(xintercept = 2020, linetype = "dashed", color = "darkred", linewidth = 0.8) +
+    geom_label(
+    aes(x = 2022, y = 0), label = "Inizio Guerra (2022)", na.rm = TRUE,
+    size = 4.5, color = "black", fontface = "bold", fill = "white", label.size = 0.5,
+    inherit.aes = FALSE
+  ) + 
+  geom_label(
+    aes(x = 2020, y = 20), label = "Shock Pandemico (2020)", na.rm = TRUE,
+    size = 4.5, color = "black", fontface = "bold", fill = "white", label.size = 0.5,
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(values = c(
+    "Ucraina" = "#A82925",                           # Rosso scuro (Epicentro)
+    "Paesi Confinanti (Prima Linea)" = "#D55E00",    # Arancione (Frontiera)
+    "Resto d'Europa" = "#0072B2"                     # Blu (Periferia/Resto)
+  )) +
+  scale_x_continuous(breaks = 2018:2024) +
+  labs(
+    y = "Tasso di Inflazione Medio (%)",
+    x = "Anno",
+    color = ""
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+**Inflazione Divergente**: Prezzi più alti nei paesi confinanti rispetto alla media UE per shock da domanda.
+
+**Shock dell'Ucraina**: Inflazione estrema causata da svalutazione e crollo della capacità produttiva causate dalla guerra.
+
+---
+```{r prep_macro_groups}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(here)
+
+# Carichiamo il dataset unico
+df <- read_csv(here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+
+# Creiamo le categorie per il confronto
+df_groups <- df %>%
+  mutate(Gruppo = case_when(
+    iso3 == "UKR" ~ "Ucraina",
+    iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA") ~ "Paesi Confinanti",
+    TRUE ~ "Resto d'Europa"
+  )) %>%
+  # Calcoliamo le medie per gruppo per ogni anno
+  group_by(Year, Gruppo, periodo) %>%
+  summarise(
+    crescita_pil = mean(crescita_pil, na.rm = TRUE),
+    inflazione = mean(inflazione, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+## Dinamiche di Crescita: Confinanti vs Resto d'Europa
+
+Oltre all'inflazione, analizziamo la variazione della **crescita del PIL reale** passando dal periodo pre-guerra allo shock del 2022.
+
+```{r plot_pil_gruppi, out.width="80%", fig.align="center"}
+ggplot(df_groups, aes(x = Year, y = crescita_pil, color = Gruppo)) +
+  geom_vline(xintercept = 2022, linetype = "dashed", color = "black") + 
+  geom_label(aes(x = 2022, y = max(df_groups$crescita_pil, na.rm = TRUE), label = "Inizio Guerra (2022)"),
+             size = 4.5, color = "black", fontface = "bold", fill = "white", label.size = 0.5) +
+  geom_line(linewidth = 1.3) +
+  scale_color_manual(values = c(
+    "Ucraina" = "#A82925",          # Rosso Unibo
+    "Paesi Confinanti" = "#555555", # Grigio scuro
+    "Resto d'Europa" = "#0072B2"    # Blu accademico
+  )) +
+  theme_minimal(base_size = 12) +
+  labs(title = "Crescita del PIL Media (%)", x = "Anno", y = "% PIL") +
+  theme(legend.position = "bottom")
+```
+
+---
+
+## Statistiche Descrittive: Macroeconomia (2014-2024)
+
+:::::: {.columns}
+
+::: {.column width="50%"}
+\centering \textbf{Crescita PIL (\%)}
+```{r tab_pil}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Prepariamo i dati filtrando i periodi di interesse
+df_stats <- df %>%
+  filter(periodo %in% c("Pre-guerra", "Post-guerra")) %>%
+  mutate(Gruppo = case_when(
+    iso3 == "UKR" ~ "UKR",
+    iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA") ~ "Conf.",
+    TRUE ~ "Resto"
+  )) %>%
+  group_by(Gruppo, periodo) %>%
+  summarise(
+    Media = mean(crescita_pil, na.rm = TRUE),
+    SD = sd(crescita_pil, na.rm = TRUE),
+    Min = min(crescita_pil, na.rm = TRUE),
+    Max = max(crescita_pil, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+kable(df_stats, format = "latex", booktabs = TRUE, digits = 1) %>%
+  kable_styling(latex_options = c("striped", "scale_down"), font_size = 6) %>%
+  column_spec(3, bold = TRUE, color = ifelse(df_stats$Media < 0, "red", "black"))
+```
+:::
+::: {.column width="50%"}
+\centering \textbf{Inflazione (\%)}
+```{r tab_inflazione}
+#| echo: false
+#| message: false
+#| warning: false
+
+df_stats_infl <- df %>%
+  filter(periodo %in% c("Pre-guerra", "Post-guerra")) %>%
+  mutate(Gruppo = case_when(
+    iso3 == "UKR" ~ "UKR",
+    iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA") ~ "Conf.",
+    TRUE ~ "Resto"
+  )) %>%
+  group_by(Gruppo, periodo) %>%
+  summarise(
+    Media = mean(inflazione, na.rm = TRUE),
+    SD = sd(inflazione, na.rm = TRUE),
+    Min = min(inflazione, na.rm = TRUE),
+    Max = max(inflazione, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+kable(df_stats_infl, format = "latex", booktabs = TRUE, digits = 1) %>%
+  kable_styling(latex_options = c("striped", "scale_down"), font_size = 6)
+```
+:::
+
+::::::
+
+\scriptsize
+
+- **Contrazione in Ucraina**: Nel post-2022 l'Ucraina affronta una recessione profonda, con il PIL che crolla mediamente del -6,8% (un peggioramento netto rispetto al -1,1% del periodo pre-guerra). L'inflazione media si attesta al 13,2%, confermando un'economia di guerra sotto stress estremo a causa della distruzione delle capacità produttive.
+
+- **Shock Asimmetrico in Europa**: I paesi confinanti vedono la propria crescita rallentare all'1,4% (dal 3,5% precedente), subendo al contempo un'impennata inflattiva dell'11,2%. Questo aumento dei prezzi è quasi il doppio rispetto al 6,0% registrato nel resto d'Europa, evidenziando una pressione economica molto più marcata per chi si trova in "prima linea".
+
+---
+
+## Modello di Regressione
+
+Per testare l'impatto asimmetrico dello shock, stimiamo il seguente modello lineare con effetti di interazione:
+
+\vspace{0.1cm}
+\scriptsize
+$$Y_{it} = \beta_0 + \beta_1 R_{it} + \beta_2 C_i + \beta_3 T_t + \beta_4 (C_i \times T_t) + \beta_5 (R_{it} \times T_t) + \beta_6 INF_{it} + \beta_7 FAT_{it} + \epsilon_{it}$$
+\normalsize
+\vspace{0.1cm}
+
+```{r tab_variabili_modello}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(knitr)
+library(kableExtra)
+
+# Creiamo il dataframe con le specifiche del modello
+variabili_df <- data.frame(
+  Variabile = c("$Y_{it}$", "$R_{it}$", "$C_i$", "$T_t$", "$C_i \\times T_t$", 
+                "$R_{it} \\times T_t$", "$INF_{it}$", "$FAT_{it}$", "$\\epsilon_{it}$"),
+  Descrizione = c("PIL pro capite (USD correnti)", "Numero rifugiati ucraini", 
+                  "Dummy paesi confinanti (1/0)", "Dummy post-guerra ($t \\ge 2022$)", 
+                  "Interazione: confinanza $\\times$ post", "Interazione: rifugiati $\\times$ post", 
+                  "Tasso di inflazione (\\%)", "Vittime totali di conflitto", "Termine di errore"),
+  Tipo = c("Continua", "Continua", "Dummy", "Dummy", "Interazione", 
+           "Interazione", "Continua", "Continua", "-"),
+  Fonte = c("World Bank", "UNHCR", "-", "-", "-", "-", "World Bank", "ACLED", "-")
+)
+
+# Generiamo la tabella compatta
+kable(variabili_df, format = "latex", booktabs = TRUE, escape = FALSE, align = "clcc") %>%
+  kable_styling(latex_options = c("striped", "scale_down"), font_size = 7) %>%
+  row_spec(0, bold = TRUE)
+```
+
+---
+
+## Test di Ipotesi: PIL tra Confinanti e Non Confinanti
+
+```{r ttest_pil}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(knitr)
+library(kableExtra)
+
+conf_post <- df |> 
+  filter(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"),
+         periodo == "Post-guerra") |> 
+  pull(GDP_per_capita)
+
+nonconf_post <- df |> 
+  filter(!iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA", "UKR"),
+         periodo == "Post-guerra") |> 
+  pull(GDP_per_capita)
+
+test_pil <- t.test(conf_post, nonconf_post, var.equal = FALSE)
+
+data.frame(
+  ` ` = c("Media Confinanti", "Media Non Confinanti", "Differenza", 
+           "t-statistic", "Gradi libertà", "p-value", "IC 95% inf", "IC 95% sup"),
+  Valore = c(
+    round(mean(conf_post, na.rm = TRUE), 1),
+    round(mean(nonconf_post, na.rm = TRUE), 1),
+    round(mean(conf_post, na.rm = TRUE) - mean(nonconf_post, na.rm = TRUE), 1),
+    round(test_pil$statistic, 4),
+    round(test_pil$parameter, 1),
+    round(test_pil$p.value, 4),
+    round(test_pil$conf.int[1], 1),
+    round(test_pil$conf.int[2], 1)
+  )
+) |>
+  kable(format = "latex", booktabs = TRUE, 
+        col.names = c("Statistica", "Valore"),
+        align = "lc") |>
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 8) |>
+  row_spec(4:6, bold = TRUE)
+```
+
+\begin{center}
+$H_0$: $\mu_{conf} = \mu_{non-conf}$ \quad $H_1$: $\mu_{conf} \neq \mu_{non-conf}$
+\end{center}
+
+\vspace{0.2cm}
+\scriptsize
+\textbf{Conclusione:} Con t = -8.58 e p-value = 0.0000 \textbf{rifiutiamo $H_0$} con altissima confidenza. 
+I paesi confinanti mostrano un PIL pro capite medio di \$18.397, contro \$50.352 del resto d'Europa: una differenza di circa \$32.000 statisticamente significativa, confermando che \textcolor{beamer@main}{\textbf{la prossimità al conflitto è associata a un forte differenziale negativo nel livello di benessere economico.}}
+
+---
+
+## Test di Ipotesi: Inflazione tra Confinanti e Non Confinanti
+
+```{r ttest_inflazione}
+#| echo: false
+#| message: false
+#| warning: false
+
+conf_infl <- df |> 
+  filter(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"),
+         periodo == "Post-guerra") |> 
+  pull(inflazione)
+
+nonconf_infl <- df |> 
+  filter(!iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA", "UKR"),
+         periodo == "Post-guerra") |> 
+  pull(inflazione)
+
+test_infl <- t.test(conf_infl, nonconf_infl, var.equal = FALSE)
+
+data.frame(
+  ` ` = c("Media Confinanti", "Media Non Confinanti", "Differenza",
+           "t-statistic", "Gradi libertà", "p-value", "IC 95% inf", "IC 95% sup"),
+  Valore = c(
+    round(mean(conf_infl, na.rm = TRUE), 2),
+    round(mean(nonconf_infl, na.rm = TRUE), 2),
+    round(mean(conf_infl, na.rm = TRUE) - mean(nonconf_infl, na.rm = TRUE), 2),
+    round(test_infl$statistic, 4),
+    round(test_infl$parameter, 1),
+    round(test_infl$p.value, 4),
+    round(test_infl$conf.int[1], 2),
+    round(test_infl$conf.int[2], 2)
+  )
+) |>
+  kable(format = "latex", booktabs = TRUE,
+        col.names = c("Statistica", "Valore"),
+        align = "lc") |>
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 8) |>
+  row_spec(4:6, bold = TRUE)
+```
+
+\begin{center}
+$H_0$: $\mu_{conf} = \mu_{non-conf}$ \quad $H_1$: $\mu_{conf} \neq \mu_{non-conf}$
+\end{center}
+
+\vspace{0.2cm}
+\scriptsize
+\textbf{Conclusione:} Con t = 2.91 e p-value = 0.0103 \textbf{rifiutiamo $H_0$}.
+I paesi confinanti hanno registrato un'inflazione media dell'11.2%, contro il 5.97% del resto d'Europa: una differenza di 5.23 punti percentuali statisticamente significativa, confermando che \textcolor{beamer@main}{\textbf{lo shock inflattivo è stato asimmetrico e più intenso per chi si trovava in prima linea geografica.}}
+
+---
+
+## Test di Ipotesi: Crescita PIL Pre vs Post Guerra
+
+```{r ttest_pre_post}
+#| echo: false
+#| message: false
+#| warning: false
+
+conf_pre <- df |> 
+  filter(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"),
+         periodo == "Pre-guerra") |> 
+  pull(crescita_pil)
+
+conf_post_pil <- df |> 
+  filter(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"),
+         periodo == "Post-guerra") |> 
+  pull(crescita_pil)
+
+rest_pre <- df |> 
+  filter(!iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA", "UKR"),
+         periodo == "Pre-guerra") |> 
+  pull(crescita_pil)
+
+rest_post <- df |> 
+  filter(!iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA", "UKR"),
+         periodo == "Post-guerra") |> 
+  pull(crescita_pil)
+
+test_conf  <- t.test(conf_pre, conf_post_pil, var.equal = FALSE)
+test_resto <- t.test(rest_pre, rest_post, var.equal = FALSE)
+
+data.frame(
+  Gruppo = c("Confinanti", "Confinanti", "Confinanti",
+             "Resto Europa", "Resto Europa", "Resto Europa"),
+  Statistica = rep(c("t-statistic", "p-value", "Differenza media"), 2),
+  Valore = c(
+    round(test_conf$statistic, 4),
+    round(test_conf$p.value, 4),
+    round(mean(conf_pre, na.rm=TRUE) - mean(conf_post_pil, na.rm=TRUE), 2),
+    round(test_resto$statistic, 4),
+    round(test_resto$p.value, 4),
+    round(mean(rest_pre, na.rm=TRUE) - mean(rest_post, na.rm=TRUE), 2)
+  )
+) |>
+  kable(format = "latex", booktabs = TRUE, align = "llc") |>
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 8) |>
+  pack_rows("Confinanti: Pre vs Post-guerra", 1, 3) |>
+  pack_rows("Resto Europa: Pre vs Post-guerra", 4, 6)
+```
+
+\begin{center}
+$H_0$: $\mu_{pre} = \mu_{post}$ \quad $H_1$: $\mu_{pre} \neq \mu_{post}$
+\end{center}
+
+\vspace{0.2cm}
+\scriptsize
+**Conclusione:** I risultati sono asimmetrici. Per i **paesi confinanti** (t = 2.43, p = 0.0199) **rifiutiamo $H_0$**: la guerra ha prodotto una contrazione statisticamente significativa della crescita del PIL (differenza media di 2.07 punti percentuali). Per il **resto d'Europa** (t = 1.00, p = 0.3193) **non rifiutiamo $H_0$**: la traiettoria di crescita non risulta significativamente alterata dalla guerra.
+
+---
+
+## Test d'Ipotesi: Rottura Strutturale nel 2022
+
+```{r test_rottura_2022}
+
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(here)
+
+df <- read_csv(here("DATA/PROCESSED/dataset_finale_integrato.csv"))
+
+# Separiamo pre-2022 e post-2022
+pre_2022 <- df %>%
+  filter(Year < 2022, Year >= 2018) %>%
+  select(Refugees, Total_Fatalities, inflazione) %>%
+  na.omit()
+
+post_2022 <- df %>%
+  filter(Year >= 2022) %>%
+  select(Refugees, Total_Fatalities, inflazione) %>%
+  na.omit()
+
+# Test t per rifugiati
+test_rif <- t.test(pre_2022$Refugees, post_2022$Refugees, var.equal = FALSE)
+
+# Test t per vittime
+test_vit <- t.test(pre_2022$Total_Fatalities, post_2022$Total_Fatalities, var.equal = FALSE)
+
+# Test t per inflazione
+test_inf <- t.test(pre_2022$inflazione, post_2022$inflazione, var.equal = FALSE)
+
+# Tabella risultati
+results <- data.frame(
+  Variabile = c("Rifugiati", "Vittime", "Inflazione (%)"),
+  Media_Pre = c(
+    round(mean(pre_2022$Refugees, na.rm = TRUE), 0),
+    round(mean(pre_2022$Total_Fatalities, na.rm = TRUE), 0),
+    round(mean(pre_2022$inflazione, na.rm = TRUE), 2)
+  ),
+  Media_Post = c(
+    round(mean(post_2022$Refugees, na.rm = TRUE), 0),
+    round(mean(post_2022$Total_Fatalities, na.rm = TRUE), 0),
+    round(mean(post_2022$inflazione, na.rm = TRUE), 2)
+  ),
+  t_stat = c(
+    round(test_rif$statistic, 3),
+    round(test_vit$statistic, 3),
+    round(test_inf$statistic, 3)
+  ),
+  p_value = c(
+    round(test_rif$p.value, 4),
+    round(test_vit$p.value, 4),
+    round(test_inf$p.value, 4)
+  ),
+  Sig = c(
+    if_else(test_rif$p.value < 0.001, "***", 
+            if_else(test_rif$p.value < 0.01, "**", 
+                    if_else(test_rif$p.value < 0.05, "*", ""))),
+    if_else(test_vit$p.value < 0.001, "***", 
+            if_else(test_vit$p.value < 0.01, "**", 
+                    if_else(test_vit$p.value < 0.05, "*", ""))),
+    if_else(test_inf$p.value < 0.001, "***", 
+            if_else(test_inf$p.value < 0.01, "**", 
+                    if_else(test_inf$p.value < 0.05, "*", "")))
+  )
+)
+
+kable(results, format = "latex", booktabs = TRUE,
+      col.names = c("Variabile", "Media Pre-2022", "Media Post-2022", 
+                    "t-stat", "p-value", "Sig."),
+      align = "lcccccc") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 7) %>%
+  row_spec(0, bold = TRUE)
+```
+
+\begin{center}
+$H_0$: $\mu_{pre-2022} = \mu_{post-2022}$ \quad $H_1$: $\mu_{pre-2022} \neq \mu_{post-2022}$
+\end{center}
+
+\vspace{0.3cm}
+
+
+
+\small
+Il test d'ipotesi conferma una **rottura strutturale simultanea nel 2022** su tre dimensioni critiche: il numero medio di rifugiati è esploso da ~11.000 a ~4.4 milioni (p<0.001), le vittime di conflitto sono salite da ~386 a ~52.849 (p<0.001), e l'inflazione media europea è quasi quadruplicata dal 2.1% all'8.4% (p<0.001). Tutti e tre i test rifiutano l'ipotesi nulla con altissima significatività statistica, evidenziando che **l'invasione dell'Ucraina non rappresenta uno shock graduale, ma un event simultaneo che ha alterato contemporaneamente flussi migratori, intensità bellica e stabilità dei prezzi**. 
+
+---
+
+## Modello di Regressione: Versione Aggiornata
+
+Per testare l'impatto asimmetrico dello shock, stimiamo il seguente modello lineare con effetti di interazione:
+
+\vspace{0.1cm}
+\scriptsize
+$$Y_{it} = \beta_0 + \beta_1 \Delta R_{it} + \beta_2 C_i + \beta_3 T_t + \beta_4 (C_i \times T_t)+$$
+$$+ \beta_5 (\Delta R_{it} \times T_t) + \beta_6 INF_{it} + \beta_7 FAT_{it} + \beta_8 \frac{1}{Dist_{i}} + \epsilon_{it}$$
+\normalsize
+\vspace{0.1cm}
+
+```{r tab_variabili_modello_v2}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(knitr)
+library(kableExtra)
+
+variabili_df <- data.frame(
+  Variabile = c("$Y_{it}$", "$\\Delta R_{it}$", "$C_i$", "$T_t$", 
+                "$C_i \\times T_t$", "$\\Delta R_{it} \\times T_t$", 
+                "$INF_{it}$", "$FAT_{it}$", "$1/Dist_i$", "$\\epsilon_{it}$"),
+  Descrizione = c("PIL pro capite (USD correnti)", 
+                  "Flusso migratorio annuo (\\textit{delta} rifugiati)",
+                  "Dummy paesi confinanti (1/0)", 
+                  "Dummy post-guerra ($t \\ge 2022$)", 
+                  "Interazione: confinanza $\\times$ post-guerra",
+                  "Interazione: flusso migratorio $\\times$ post-guerra", 
+                  "Tasso di inflazione (\\%)", 
+                  "Vittime totali di conflitto",
+                  "Distanza inversa da Kyiv (effetto gravità)",
+                  "Termine di errore"),
+  Tipo = c("Continua", "Continua", "Dummy", "Dummy", 
+           "Interazione", "Interazione", "Continua", "Continua", "Continua", "-"),
+  Fonte = c("World Bank", "UNHCR", "-", "-", "-", "-", "World Bank", "ACLED", "CEPII", "-")
+)
+
+kable(variabili_df, format = "latex", booktabs = TRUE, escape = FALSE, align = "clcc") %>%
+  kable_styling(latex_options = c("striped", "scale_down"), font_size = 6.5) %>%
+  row_spec(0, bold = TRUE) %>%
+  row_spec(c(2, 9), bold = TRUE)
+```
+
+---
+
+## Risultati del Modello OLS
+
+```{r prep_ols}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(broom)
+library(knitr)
+library(kableExtra)
+
+df_model <- df |>
+  filter(Year <= 2024, iso3 != "UKR") |>
+  arrange(iso3, Year) |>
+  group_by(iso3) |>
+  mutate(delta_refugees = Refugees - lag(Refugees)) |>
+  ungroup() |>
+  mutate(
+    inv_dist = 1 / Dist_km,
+    C_i  = if_else(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"), 1, 0),
+    T_t  = if_else(Year >= 2022, 1, 0),
+    CxT  = C_i * T_t,
+    DRxT = delta_refugees * T_t
+  ) |>
+  filter(!is.na(delta_refugees))
+
+modello <- lm(
+  GDP_per_capita ~ delta_refugees + C_i + T_t + CxT + DRxT +
+                   inflazione + Total_Fatalities + inv_dist,
+  data = df_model
+)
+
+s <- summary(modello)
+
+tidy(modello, conf.int = TRUE) |>
+  mutate(
+    term = c("Intercetta",
+             "$\\Delta R_{it}$",
+             "$C_i$",
+             "$T_t$",
+             "$C_i \\times T_t$",
+             "$\\Delta R_{it} \\times T_t$",
+             "$INF_{it}$",
+             "$FAT_{it}$",
+             "$1/Dist_i$"),
+    sig = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01  ~ "**",
+      p.value < 0.05  ~ "*",
+      p.value < 0.1   ~ ".",
+      TRUE            ~ ""
+    )
+  ) |>
+  select(term, estimate, std.error, statistic, p.value, sig) |>
+  mutate(across(where(is.numeric), \(x) round(x, 3))) |>
+  kable(format = "latex", booktabs = TRUE, escape = FALSE,
+        col.names = c("Variabile", "Stima", "Std. Error", "t-stat", "p-value", "")) |>
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 7) |>
+  row_spec(0, bold = TRUE) |>
+  footnote(
+    general = "Signif.: *** p$<$0.001,  ** p$<$0.01,  * p$<$0.05 . p$<$0.1",
+    escape = FALSE,
+    general_title = "",
+    footnote_as_chunk = TRUE
+  )
+```
+
+\vspace{0.2cm}
+\scriptsize
+\textbf{R-quadro:} `r round(s$r.squared, 4)` \quad
+\textbf{R-quadro Adj.:} `r round(s$adj.r.squared, 4)` \quad
+\textbf{N:} `r nobs(modello)`
+
+---
+
+## Interpretazione del modello OLS
+L'analisi rivela che *la distanza da Kyiv è il fattore determinante*, confermando che i paesi confinanti subiscono una "zona di depressione economica". Tuttavia, l'effetto non è diretto dalla prossimità geografica, bensì *mediato dall'inflazione*. I flussi migratori in sé e l'intensità del conflitto non risultano significativi. 
+
+**Conclusione**: lo shock economico della guerra non opera attraverso un meccanismo di "border penalty" diretto, ma attraverso l'onere inflattivo che i paesi di frontiera hanno subito nel gestire l'afflusso massiccio di rifugiati. Il modello spiega il 24.65% della varianza, suggerendo che altri fattori rimangono rilevanti.
+
