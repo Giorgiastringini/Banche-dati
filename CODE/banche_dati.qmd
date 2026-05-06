@@ -622,44 +622,6 @@ kable(df_stats_infl, format = "latex", booktabs = TRUE, digits = 1) %>%
 
 ---
 
-## Modello di Regressione
-
-Per testare l'impatto asimmetrico dello shock, stimiamo il seguente modello lineare con effetti di interazione:
-
-\vspace{0.1cm}
-\scriptsize
-$$Y_{it} = \beta_0 + \beta_1 R_{it} + \beta_2 C_i + \beta_3 T_t + \beta_4 (C_i \times T_t) + \beta_5 (R_{it} \times T_t) + \beta_6 INF_{it} + \beta_7 FAT_{it} + \epsilon_{it}$$
-\normalsize
-\vspace{0.1cm}
-
-```{r tab_variabili_modello}
-#| echo: false
-#| message: false
-#| warning: false
-
-library(knitr)
-library(kableExtra)
-
-# Creiamo il dataframe con le specifiche del modello
-variabili_df <- data.frame(
-  Variabile = c("$Y_{it}$", "$R_{it}$", "$C_i$", "$T_t$", "$C_i \\times T_t$", 
-                "$R_{it} \\times T_t$", "$INF_{it}$", "$FAT_{it}$", "$\\epsilon_{it}$"),
-  Descrizione = c("PIL pro capite (USD correnti)", "Numero rifugiati ucraini", 
-                  "Dummy paesi confinanti (1/0)", "Dummy post-guerra ($t \\ge 2022$)", 
-                  "Interazione: confinanza $\\times$ post", "Interazione: rifugiati $\\times$ post", 
-                  "Tasso di inflazione (\\%)", "Vittime totali di conflitto", "Termine di errore"),
-  Tipo = c("Continua", "Continua", "Dummy", "Dummy", "Interazione", 
-           "Interazione", "Continua", "Continua", "-"),
-  Fonte = c("World Bank", "UNHCR", "-", "-", "-", "-", "World Bank", "ACLED", "-")
-)
-
-# Generiamo la tabella compatta
-kable(variabili_df, format = "latex", booktabs = TRUE, escape = FALSE, align = "clcc") %>%
-  kable_styling(latex_options = c("striped", "scale_down"), font_size = 7) %>%
-  row_spec(0, bold = TRUE)
-```
-
----
 
 ## Test di Ipotesi: PIL tra Confinanti e Non Confinanti
 
@@ -917,7 +879,7 @@ Il test d'ipotesi conferma una **rottura strutturale simultanea nel 2022** su tr
 
 ---
 
-## Modello di Regressione: Versione Aggiornata
+## Modello di Regressione: 
 
 Per testare l'impatto asimmetrico dello shock, stimiamo il seguente modello lineare con effetti di interazione:
 
