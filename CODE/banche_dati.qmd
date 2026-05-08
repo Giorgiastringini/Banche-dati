@@ -817,7 +817,8 @@ $H_0$: $\mu_{pre} = \mu_{post}$ \quad $H_1$: $\mu_{pre} \neq \mu_{post}$
 
 \vspace{0.2cm}
 \scriptsize
-**Conclusione:** I risultati sono asimmetrici. Per i **paesi confinanti** (t = 2.43, p = 0.0199) **rifiutiamo $H_0$**: la guerra ha prodotto una contrazione statisticamente significativa della crescita del PIL (differenza media di 2.07 punti percentuali). Per il **resto d'Europa** (t = 1.00, p = 0.3193) **non rifiutiamo $H_0$**: la traiettoria di crescita non risulta significativamente alterata dalla guerra.
+**Conclusione:** I risultati sono asimmetrici. Per i **paesi confinanti** (t = 2.43, p = 0.0199) **rifiutiamo $H_0$**: emerge una differenza statisticamente significativa tra la crescita media del PIL pre e post guerra, pari a circa 2.07 punti percentuali. 
+Per il **resto d'Europa** (t = 1.00, p = 0.3193) **non rifiutiamo $H_0$**: non emerge una differenza statisticamente significativa tra i due periodi.
 
 ---
 
