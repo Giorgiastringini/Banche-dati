@@ -707,7 +707,7 @@ $H_0$: $\mu_{conf} = \mu_{non-conf}$ \quad $H_1$: $\mu_{conf} \neq \mu_{non-conf
 \vspace{0.2cm}
 \scriptsize
 \textbf{Conclusione:} Con t = -8.58 e p-value = 0.0000 \textbf{rifiutiamo $H_0$} con altissima confidenza. 
-I paesi confinanti mostrano un PIL pro capite medio di \$18.397, contro \$50.352 del resto d'Europa: una differenza di circa \$32.000 statisticamente significativa, confermando che \textcolor{beamer@main}{\textbf{la prossimità al conflitto è associata a un forte differenziale negativo nel livello di benessere economico.}}
+I paesi confinanti mostrano un PIL pro capite medio di \$18.397, contro \$50.352 del resto d'Europa: una differenza di circa \$32.000 statisticamente significativa. Questo risultato va a riflettere \textcolor{beamer@main}{\textbf{la disparità economica tra le due aree, con la prossimità geografica alla zona di conflitto che coincide con regioni caratterizzate da livelli di benessere economico inferiori.}}
 
 ---
 
