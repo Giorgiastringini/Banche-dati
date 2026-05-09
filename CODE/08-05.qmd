@@ -1152,3 +1152,30 @@ tidy(modello, conf.int = TRUE) |>
   \item I rifugiati tendono a dirigersi verso paesi già ricchi: correlazione tra $\Delta R_{it}$ e $Y_{it}$ non causale.
   \item I coefficienti vanno interpretati come associazioni, non relazioni causali.
 \end{itemize}
+
+---
+
+## Conclusioni: Limiti dello Studio
+
+Nonostante i risultati, il modello presenta vincoli metodologici e informativi:
+
+\small
+* **Multicollinearità:** VIF elevati per variabili di flusso e tempo ($AR_{it}$ e $T_t$); ridotta precisione nelle stime puntuali e difficoltà nell'isolare l'effetto individuale.
+* **Endogeneità:** Possibile causalità inversa (Pull Factor) tra $AR_{it}$ e $T_t$; i rifugiati scelgono mete economicamente stabili, distorcendo l'attribuzione causale netta.
+* **Variabili Omesse:** $R^2 = 24.65\%$; il modello esclude shock energetico, politiche fiscali, aiuti UE e struttura del mercato del lavoro.
+* **Frequenza Dati:** L’annualità non coglie la rapidità dello shock del 2022, manifestatosi in modo concentrato nei primi mesi del conflitto.
+* **Eterogeneità:** La Moldavia rappresenta un outlier strutturale-istituzionale rispetto agli altri paesi di frontiera inclusi nel gruppo.
+
+---
+
+## Conclusioni: Sviluppi e Ricerca Futura
+
+Per superare i limiti attuali, si individuano le seguenti direzioni di approfondimento:
+
+\small
+* **Stime Robuste:** Implementazione di Effetti Fissi o Variabili Strumentali (IV) per correggere l'endogeneità e migliorare l'identificazione.
+* **Alta Frequenza:** Utilizzo di dati mensili o trimestrali per isolare meglio la velocità di trasmissione dello shock inflattivo.
+* **Quasi-esperimenti:** Sviluppo di modelli *Difference-in-Differences* (DiD) strutturati per isolare l'effetto netto del trattamento "confine".
+* **Estensione Macro:** Integrazione di indicatori su dipendenza energetica, spesa pubblica e politiche monetarie nazionali.
+* **Analisi Regionale:** Studio a livello sub-nazionale o urbano per valutare la reale capacità di assorbimento dei territori.
+* **Integrazione Qualitativa:** Supporto dei risultati quantitativi con report istituzionali e studi di caso per un'analisi di contesto.
