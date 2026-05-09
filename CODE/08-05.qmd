@@ -959,6 +959,83 @@ kable(variabili_df, format = "latex", booktabs = TRUE, escape = FALSE, align = "
 
 ---
 
+## Diagnostica: Test VIF (Multicollinearità)
+
+```{r vif_test}
+#| echo: false
+#| message: false
+#| warning: false
+
+if (!requireNamespace("car", quietly = TRUE)) install.packages("car", repos = "https://cloud.r-project.org")
+library(car)
+library(knitr)
+library(kableExtra)
+
+# Ricalcoliamo il modello qui per avere vif_values disponibile
+df_model_vif <- df |>
+  filter(Year <= 2024, iso3 != "UKR") |>
+  arrange(iso3, Year) |>
+  group_by(iso3) |>
+  mutate(delta_refugees = Refugees - lag(Refugees)) |>
+  ungroup() |>
+  mutate(
+    inv_dist = 1 / Dist_km,
+    C_i  = if_else(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"), 1, 0),
+    T_t  = if_else(Year >= 2022, 1, 0),
+    CxT  = C_i * T_t,
+    DRxT = delta_refugees * T_t
+  ) |>
+  filter(!is.na(delta_refugees))
+
+modello_vif <- lm(
+  GDP_per_capita ~ delta_refugees + C_i + T_t + CxT + DRxT +
+                   inflazione + Total_Fatalities + inv_dist,
+  data = df_model_vif
+)
+
+vif_values <- as.numeric(vif(modello_vif))
+
+vif_df <- data.frame(
+  Variabile = c("$\\Delta R_{it}$", "$C_i$", "$T_t$",
+                "$C_i \\times T_t$", "$\\Delta R_{it} \\times T_t$",
+                "$INF_{it}$", "$FAT_{it}$", "$1/Dist_i$"),
+  VIF = round(vif_values, 3),
+  Giudizio = ifelse(vif_values < 5, "Nessun problema",
+             ifelse(vif_values < 10, "Attenzione", "Problema serio"))
+)
+
+righe_problema <- which(vif_df$VIF >= 5)
+
+tab <- kable(vif_df, format = "latex", booktabs = TRUE, escape = FALSE,
+        col.names = c("Variabile", "VIF", "Giudizio"),
+        align = "lcc") |>
+  kable_styling(latex_options = c("striped", "hold_position"), font_size = 8) |>
+  row_spec(0, bold = TRUE)
+
+if (length(righe_problema) > 0) {
+  tab <- tab |> row_spec(righe_problema, bold = TRUE)
+}
+
+tab
+```
+
+\vspace{0.2cm}
+\scriptsize
+\textbf{Interpretazione:} I VIF elevati per $\Delta R_{it}$ e $\Delta R_{it} \times T_t$ sono attesi: 
+termini di interazione sono per costruzione correlati con le variabili originali. 
+
+Stesso vale per $T_t$ con le sue interazioni. 
+
+\textcolor{beamer@main}{\textbf{Limite riconosciuto: la multicollinearità riduce la precisione 
+delle stime individuali, ma non invalida il modello nel suo complesso. 
+Il VIF di $1/Dist_i$ e $C_i$ rimane basso (< 5), confermando 
+che le due variabili geografiche sono distinguibili.}}
+
+
+
+
+---
+
 ## Risultati del Modello OLS
 
 ```{r prep_ols}
@@ -1034,90 +1111,10 @@ tidy(modello, conf.int = TRUE) |>
 
 ---
 
-## Diagnostica: Test VIF (Multicollinearità)
 
-```{r vif_test}
-#| echo: false
-#| message: false
-#| warning: false
 
-if (!requireNamespace("car", quietly = TRUE)) install.packages("car", repos = "https://cloud.r-project.org")
-library(car)
-library(knitr)
-library(kableExtra)
 
-# Ricalcoliamo il modello qui per avere vif_values disponibile
-df_model_vif <- df |>
-  filter(Year <= 2024, iso3 != "UKR") |>
-  arrange(iso3, Year) |>
-  group_by(iso3) |>
-  mutate(delta_refugees = Refugees - lag(Refugees)) |>
-  ungroup() |>
-  mutate(
-    inv_dist = 1 / Dist_km,
-    C_i  = if_else(iso3 %in% c("POL", "ROU", "SVK", "HUN", "MDA"), 1, 0),
-    T_t  = if_else(Year >= 2022, 1, 0),
-    CxT  = C_i * T_t,
-    DRxT = delta_refugees * T_t
-  ) |>
-  filter(!is.na(delta_refugees))
-
-modello_vif <- lm(
-  GDP_per_capita ~ delta_refugees + C_i + T_t + CxT + DRxT +
-                   inflazione + Total_Fatalities + inv_dist,
-  data = df_model_vif
-)
-
-vif_values <- as.numeric(vif(modello_vif))
-
-vif_df <- data.frame(
-  Variabile = c("$\\Delta R_{it}$", "$C_i$", "$T_t$",
-                "$C_i \\times T_t$", "$\\Delta R_{it} \\times T_t$",
-                "$INF_{it}$", "$FAT_{it}$", "$1/Dist_i$"),
-  VIF = round(vif_values, 3),
-  Giudizio = ifelse(vif_values < 5, "Nessun problema",
-             ifelse(vif_values < 10, "Attenzione", "Problema serio"))
-)
-
-righe_problema <- which(vif_df$VIF >= 5)
-
-tab <- kable(vif_df, format = "latex", booktabs = TRUE, escape = FALSE,
-        col.names = c("Variabile", "VIF", "Giudizio"),
-        align = "lcc") |>
-  kable_styling(latex_options = c("striped", "hold_position"), font_size = 8) |>
-  row_spec(0, bold = TRUE)
-
-if (length(righe_problema) > 0) {
-  tab <- tab |> row_spec(righe_problema, bold = TRUE)
-}
-
-tab
-```
-
-\vspace{0.2cm}
-\scriptsize
-\textbf{Interpretazione:} I VIF elevati per $\Delta R_{it}$ e $\Delta R_{it} \times T_t$ sono attesi: 
-termini di interazione sono per costruzione correlati con le variabili originali. 
-
-Stesso vale per $T_t$ con le sue interazioni. 
-
-\textcolor{beamer@main}{\textbf{Limite riconosciuto: la multicollinearità riduce la precisione 
-delle stime individuali, ma non invalida il modello nel suo complesso. 
-Il VIF di $1/Dist_i$ e $C_i$ rimane basso (< 5), confermando 
-che le due variabili geografiche sono distinguibili.}}
-
----
-
-## Interpretazione del modello OLS
-L'analisi rivela che *la distanza da Kyiv è il fattore determinante*, confermando che i paesi confinanti subiscono una "zona di depressione economica". Tuttavia, l'effetto non è diretto dalla prossimità geografica, bensì *mediato dall'inflazione*. I flussi migratori in sé e l'intensità del conflitto non risultano significativi. 
-
-**Conclusione**: lo shock economico della guerra non opera attraverso un meccanismo di "border penalty" diretto, ma attraverso l'onere inflattivo che i paesi di frontiera hanno subito nel gestire l'afflusso massiccio di rifugiati. Il modello spiega il 24.65% della varianza, suggerendo che altri fattori rimangono rilevanti.
-
----
-
----
-
-## Interpretazione modificata del modello OLS (1/2)
+## Interpretazione del modello OLS (1/2)
 
 \small
 \textbf{Variabili significative:}
@@ -1135,7 +1132,7 @@ L'analisi rivela che *la distanza da Kyiv è il fattore determinante*, conferman
 
 ---
 
-## Interpretazione modificata del modello OLS (2/2) : Limiti
+## Interpretazione del modello OLS (2/2) : Limiti
 
 \scriptsize
 \textbf{1. R-quadro basso (0.2465):}
