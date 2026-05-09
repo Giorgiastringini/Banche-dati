@@ -1,0 +1,1069 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\author{}
+\date{}
+\begin{document}
+
+
+\subsection{}\label{section}
+
+\titlepage
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Obiettivi e Domande della
+Ricerca}\label{obiettivi-e-domande-della-ricerca}
+
+Il nostro studio si è evoluto in tre direzioni complementari per
+analizzare lo shock del 2022:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Driver Migratori:} Quali fattori (Violenza, Distanza, PIL)
+  determinano la scelta del paese di destinazione, nell'ipotesi che i
+  flussi partono a causa della guerra, si riversano sui confini per la
+  gravità spaziale, ma si stabilizzano dove l'economia è più forte?
+\item
+  \textbf{Shock Macroeconomico:} Come hanno reagito l'inflazione e i
+  tassi di disoccupazione europei all'afflusso massiccio di rifugiati?
+\item
+  \textbf{Resilienza Economica e Confini:} Esiste un differenziale di
+  impatto sul PIL pro capite tra i paesi confinanti (prima linea) e i
+  paesi non confinanti? Lo shock migratorio ha influenzato la crescita
+  in modo asimmetrico?
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Focus: Resilienza Economica e
+Confini}\label{focus-resilienza-economica-e-confini}
+
+La terza domanda di ricerca mira a isolare l'effetto ``confine'' sulla
+crescita economica:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Asimmetria Geografica:} Analisi delle variazioni di PIL pro
+  capite tra paesi limitrofi (es. Polonia, Romania, Moldavia) e il resto
+  d'Europa.
+\item
+  \textbf{Correlazione con i Flussi:} Verificare se la magnitudo
+  dell'afflusso migratorio post-febbraio 2022 ha agito come driver di
+  spesa (stimolo fiscale) o come pressione sulle risorse.
+\item
+  \textbf{Ipotesi OLS:} Testare se, a parità di condizioni iniziali, la
+  prossimità al conflitto ha generato traiettorie di PIL
+  significativamente diverse.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Metodologia: Integrazione dei
+Dataset}\label{metodologia-integrazione-dei-dataset}
+
+Per rispondere a queste domande, abbiamo fuso due database eterogenei in
+un unico \textbf{Dataset Integrato}:
+
+\textbf{Fonti integrate:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Dataset Migratorio:} UNHCR (Flussi), ACLED (Vittime), CEPII
+  (Distanze).
+\item
+  \textbf{Dataset Macro:} World Bank (PIL reale, Inflazione, Crescita
+  \%).
+\end{itemize}
+
+\textbf{Processo di Merging:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Chiavi Uniche:} Join su \textbf{ISO3} e \textbf{Anno}.
+\item
+  \textbf{Armonizzazione:} Conversione dei microdati bellici in
+  aggregati annuali.
+\item
+  \textbf{Feature Selection:} Rimozione della variabile
+  \texttt{Protest\_Events}.
+\item
+  \textbf{Bilanciamento:} Gestione dei (NA) per garantire continuità nel
+  Panel.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Struttura del Master Dataset
+(Codebook)}\label{struttura-del-master-dataset-codebook}
+
+\textbf{Panel:} 32 Nazioni \textbar{} 15 Anni (2010-2024) \textbar{}
+Frequenza Annuale
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{6}{8}\selectfont
+
+\begin{tabular}{>{}llll}
+\toprule
+Categoria & Variabile & Descrizione & Fonte\\
+\midrule
+\textbf{Target (Y)} & Refugees & Flussi rifugiati ucraini & UNHCR\\
+\textbf{Push (X1)} & Total\_Fatalities & Intensità conflitto (vittime) & ACLED\\
+\textbf{Pull (X2)} & GDP\_per\_capita & Ricchezza paese destinaz. & World Bank\\
+\textbf{Friction (X3)} & Dist\_km & Distanza lineare da Kyiv & CEPII\\
+\textbf{Macro Shock} & crescita\_pil & Variazione \% PIL reale & World Bank\\
+\addlinespace
+\textbf{Macro Shock} & inflazione & Variazione \% prezzi & World Bank\\
+\textbf{Controllo} & Periodo & Fasi: 2010-13, 14-21, 22-24 & -\\
+\textbf{Controllo} & Confine & Dummy contiguità (1/0) & -\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\textbf{Variabili di Controllo:}
+
+\begin{itemize}
+\item
+  \texttt{Periodo}: Pre-crisi (2010-13), Pre-guerra (2014-21),
+  Post-guerra (2022-24).
+\item
+  \texttt{Confine}: Dummy variabile per identificare la contiguità
+  geografica.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Lo Shock del 2022: Statistiche
+Descrittive}\label{lo-shock-del-2022-statistiche-descrittive}
+
+L'aggregazione temporale evidenzia il ``salto'' strutturale che
+giustifica l'uso della variabile \(X_1\) (Vittime) come causa
+scatenante.
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{8}{10}\selectfont
+
+\begin{tabular}{rrrr}
+\toprule
+Anno & Tot. Rifugiati & Vittime Guerra & Inflazione Media (\%)\\
+\midrule
+\cellcolor{gray!10}{2018} & \cellcolor{gray!10}{11679} & \cellcolor{gray!10}{883} & \cellcolor{gray!10}{2.2}\\
+2019 & 12620 & 392 & 2.0\\
+\cellcolor{gray!10}{2020} & \cellcolor{gray!10}{9513} & \cellcolor{gray!10}{121} & \cellcolor{gray!10}{0.9}\\
+2021 & 11481 & 149 & 3.1\\
+\cellcolor[HTML]{F2F2F2}{\textbf{\cellcolor{gray!10}{2022}}} & \cellcolor[HTML]{F2F2F2}{\textbf{\cellcolor{gray!10}{4227212}}} & \cellcolor[HTML]{F2F2F2}{\textbf{\cellcolor{gray!10}{40081}}} & \cellcolor[HTML]{F2F2F2}{\textbf{\cellcolor{gray!10}{11.1}}}\\
+\addlinespace
+2023 & 4472174 & 39596 & 7.3\\
+\cellcolor{gray!10}{2024} & \cellcolor{gray!10}{4884813} & \cellcolor{gray!10}{69872} & \cellcolor{gray!10}{2.7}\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Rottura strutturale (2022)}: Si osserva la simultaneità dello
+  shock. Le vittime passano da poche centinaia a oltre 40.000, i
+  rifugiati superano i 4 milioni e l'inflazione media europea passa dal
+  3.1\% all'11.1\% (quasi 4 volte la media pre-guerra).
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Dinamica dei Flussi: Prima Linea vs Resto
+d'Europa}\label{dinamica-dei-flussi-prima-linea-vs-resto-deuropa}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{banche_dati_files/figure-pdf/plot_trend_gruppi-1.pdf}
+\end{center}
+
+\textbf{Distribuzione del carico:} Sebbene il resto d'Europa (26 nazioni
+aggregate) accolga il numero assoluto maggiore di rifugiati, i soli 5
+paesi di frontiera assorbono un volume impressionante e
+proporzionalmente enorme, a conferma del fortissimo ``attrito
+geografico'' nella primissima fase di fuga.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{L'Effetto Gravità: Distanza e
+PIL}\label{leffetto-gravituxe0-distanza-e-pil}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(scales)}
+\FunctionTok{library}\NormalTok{(ggrepel)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(tidyr) }\CommentTok{\# Ci serve per la funzione drop\_na()}
+
+\NormalTok{master\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# 1. Pulizia: Togliamo chi ha 0 rifugiati (evita log di 0) }
+  \FunctionTok{filter}\NormalTok{(Year }\SpecialCharTok{==} \DecValTok{2022}\NormalTok{, Refugees }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# E togliamo eventuali righe con dati mancanti per evitare i Warning}
+  \FunctionTok{drop\_na}\NormalTok{(Dist\_km, GDP\_per\_capita, Refugees) }\SpecialCharTok{\%\textgreater{}\%}
+  
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Dist\_km, }\AttributeTok{y =}\NormalTok{ Refugees)) }\SpecialCharTok{+}
+  
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#D55E00"}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# 2. Doppio mapping: Size E Fill dipendono entrambi dal PIL pro{-}capite}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{size =}\NormalTok{ GDP\_per\_capita, }\AttributeTok{fill =}\NormalTok{ GDP\_per\_capita), }
+             \AttributeTok{shape =} \DecValTok{21}\NormalTok{, }\AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
+  
+  \FunctionTok{geom\_text\_repel}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ iso3), }
+                  \AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#333333"}\NormalTok{,}
+                  \AttributeTok{box.padding =} \FloatTok{0.4}\NormalTok{, }\AttributeTok{point.padding =} \FloatTok{0.3}\NormalTok{, }\AttributeTok{segment.color =} \StringTok{"grey70"}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Formattazione assi pulita}
+  \FunctionTok{scale\_y\_log10}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ comma) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ comma) }\SpecialCharTok{+}
+  
+  \CommentTok{\# 3. Risoluzione errori formato numeri e unione legende}
+  \CommentTok{\# Diamo a entrambe le scale lo STESSO nome così R le unisce in una sola legenda}
+  \FunctionTok{scale\_size\_continuous}\NormalTok{(}\AttributeTok{name =} \StringTok{"PIL Pro{-}Capite:"}\NormalTok{, }
+                        \AttributeTok{range =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{10}\NormalTok{), }
+                        \AttributeTok{labels =} \FunctionTok{dollar\_format}\NormalTok{(}\AttributeTok{prefix =} \StringTok{"$"}\NormalTok{, }\AttributeTok{big.mark =} \StringTok{"."}\NormalTok{, }\AttributeTok{decimal.mark =} \StringTok{","}\NormalTok{)) }\SpecialCharTok{+}
+  
+  \FunctionTok{scale\_fill\_viridis\_c}\NormalTok{(}\AttributeTok{name =} \StringTok{"PIL Pro{-}Capite:"}\NormalTok{, }
+                       \AttributeTok{option =} \StringTok{"plasma"}\NormalTok{, }\CommentTok{\# Palette che va dal viola scuro al giallo chiaro}
+                       \AttributeTok{labels =} \FunctionTok{dollar\_format}\NormalTok{(}\AttributeTok{prefix =} \StringTok{"$"}\NormalTok{, }\AttributeTok{big.mark =} \StringTok{"."}\NormalTok{, }\AttributeTok{decimal.mark =} \StringTok{","}\NormalTok{)) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Forziamo la legenda a combinare dimensione e colore nei pallini in basso}
+  \FunctionTok{guides}\NormalTok{(}\AttributeTok{fill =} \FunctionTok{guide\_legend}\NormalTok{(), }\AttributeTok{size =} \FunctionTok{guide\_legend}\NormalTok{()) }\SpecialCharTok{+}
+  
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{12}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{14}\NormalTok{),}
+    \AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{()}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"L\textquotesingle{}Effetto Gravità sulle Migrazioni (2022)"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"I flussi diminuiscono con la distanza, ma i paesi ricchi attraggono di più"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Distanza da Kyiv (km)"}\NormalTok{, }
+    \AttributeTok{y =} \StringTok{"Rifugiati (Scala Log10)"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{banche_dati_files/figure-pdf/plot_scatter-1.pdf}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Distribuzione geografica: Mappa dei rifugiati per
+paese}\label{distribuzione-geografica-mappa-dei-rifugiati-per-paese}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(sf)}
+\FunctionTok{library}\NormalTok{(rnaturalearth)}
+\FunctionTok{library}\NormalTok{(rnaturalearthdata)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(scales)}
+
+\CommentTok{\# 1. Scarichiamo i confini dell\textquotesingle{}Europa}
+\NormalTok{europe }\OtherTok{\textless{}{-}} \FunctionTok{ne\_countries}\NormalTok{(}\AttributeTok{scale =} \StringTok{"medium"}\NormalTok{, }\AttributeTok{returnclass =} \StringTok{"sf"}\NormalTok{, }\AttributeTok{continent =} \StringTok{"Europe"}\NormalTok{)}
+
+\CommentTok{\# 2. Filtriamo i nostri dati per il 2022}
+\NormalTok{map\_data\_2022 }\OtherTok{\textless{}{-}}\NormalTok{ master\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(Year }\SpecialCharTok{==} \DecValTok{2022}\NormalTok{)}
+
+\CommentTok{\# 3. Uniamo usando adm0\_a3 (molto più affidabile di iso\_a3 per i confini)}
+\NormalTok{europe\_data }\OtherTok{\textless{}{-}}\NormalTok{ europe }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{left\_join}\NormalTok{(map\_data\_2022, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"adm0\_a3"} \OtherTok{=} \StringTok{"iso3"}\NormalTok{))}
+
+\CommentTok{\# 4. Disegniamo la mappa}
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ europe\_data) }\SpecialCharTok{+}
+  \CommentTok{\# Livello 1: Sfondo per tutti i paesi europei (grigio chiaro)}
+  \FunctionTok{geom\_sf}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#E8E8E8"}\NormalTok{, }\AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.4}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Livello 2: Coloriamo solo i paesi del nostro dataset con i rifugiati}
+  \FunctionTok{geom\_sf}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ Refugees), }\AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Livello 3: Evidenziamo l\textquotesingle{}Ucraina come "Epicentro" (grigio scuro, bordo rosso)}
+  \FunctionTok{geom\_sf}\NormalTok{(}\AttributeTok{data =}\NormalTok{ europe\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(adm0\_a3 }\SpecialCharTok{==} \StringTok{"UKR"}\NormalTok{),}
+          \AttributeTok{fill =} \StringTok{"\#555555"}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#D55E00"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_sf\_text}\NormalTok{(}\AttributeTok{data =}\NormalTok{ europe\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(adm0\_a3 }\SpecialCharTok{==} \StringTok{"UKR"}\NormalTok{),}
+               \FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \StringTok{"UKR"}\NormalTok{), }\AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{size =} \FloatTok{3.5}\NormalTok{, }\AttributeTok{fontface =} \StringTok{"bold"}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Inquadratura allargata per includere Portogallo, Scandinavia e Cipro}
+  \FunctionTok{coord\_sf}\NormalTok{(}\AttributeTok{xlim =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{12}\NormalTok{, }\DecValTok{45}\NormalTok{), }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\DecValTok{34}\NormalTok{, }\DecValTok{71}\NormalTok{), }\AttributeTok{expand =} \ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Scala colori "Plasma" con legenda orizzontale formattata}
+  \FunctionTok{scale\_fill\_viridis\_c}\NormalTok{(}
+    \AttributeTok{option =} \StringTok{"plasma"}\NormalTok{, }
+    \AttributeTok{trans =} \StringTok{"log10"}\NormalTok{, }
+    \AttributeTok{labels =} \FunctionTok{comma\_format}\NormalTok{(}\AttributeTok{big.mark =} \StringTok{"."}\NormalTok{, }\AttributeTok{decimal.mark =} \StringTok{","}\NormalTok{),}
+    \AttributeTok{na.value =} \StringTok{"transparent"}\NormalTok{, }\CommentTok{\# Lascia trasparire lo sfondo grigio}
+    \AttributeTok{name =} \StringTok{"Numero di Rifugiati (Scala Log10)"}\NormalTok{,}
+    \AttributeTok{guide =} \FunctionTok{guide\_colorbar}\NormalTok{(}
+      \AttributeTok{direction =} \StringTok{"horizontal"}\NormalTok{,}
+      \AttributeTok{barheight =} \FunctionTok{unit}\NormalTok{(}\DecValTok{4}\NormalTok{, }\StringTok{"mm"}\NormalTok{),}
+      \AttributeTok{barwidth =} \FunctionTok{unit}\NormalTok{(}\DecValTok{80}\NormalTok{, }\StringTok{"mm"}\NormalTok{),}
+      \AttributeTok{title.position =} \StringTok{"top"}\NormalTok{,}
+      \AttributeTok{title.hjust =} \FloatTok{0.5}
+\NormalTok{    )}
+\NormalTok{  ) }\SpecialCharTok{+}
+  
+  \CommentTok{\# Tema mappa pulito}
+  \FunctionTok{theme\_void}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{12}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{legend.margin =} \FunctionTok{margin}\NormalTok{(}\AttributeTok{t =} \DecValTok{10}\NormalTok{, }\AttributeTok{b =} \DecValTok{10}\NormalTok{),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{16}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+    \AttributeTok{plot.subtitle =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{11}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#555555"}\NormalTok{, }\AttributeTok{margin =} \FunctionTok{margin}\NormalTok{(}\AttributeTok{b =} \DecValTok{10}\NormalTok{)),}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Geografia dell\textquotesingle{}Accoglienza in Europa (2022)"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Intensità dei flussi migratori. In grigio scuro l\textquotesingle{}epicentro del conflitto (UKR)."}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{banche_dati_files/figure-pdf/plot_map-1.pdf}
+
+\begin{itemize}
+\item
+  \textbf{Vicinanza}: Polonia e Romania hanno accolto i primi flussi per
+  prossimità.
+\item
+  \textbf{Economia}: Germania e Cechia hanno attratto i flussi per
+  ricchezza e welfare.
+\item
+  \textbf{Distanza}: Italia, Spagna e Francia hanno ricevuto meno flussi
+  perché lontane.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{La Moldavia: un caso speciale nella frontiera
+orientale}\label{la-moldavia-un-caso-speciale-nella-frontiera-orientale}
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{8}{10}\selectfont
+
+\begin{tabular}{lrrr}
+\toprule
+Paese & Pop. (Mln) & Rifugiati 2022 & Rifugiati/1000 ab.\\
+\midrule
+Polonia & 37.7 & 1500000 & 39.8\\
+Romania & 19.1 & 650000 & 34.0\\
+\cellcolor[HTML]{FFF3CD}{\textbf{Moldavia}} & \cellcolor[HTML]{FFF3CD}{\textbf{3.5}} & \cellcolor[HTML]{FFF3CD}{\textbf{490000}} & \cellcolor[HTML]{FFF3CD}{\textbf{140.0}}\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\textbf{Caratteristiche descrittive:}
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Status Istituzionale:} Non membro UE (candidatura 2022)
+\item
+  \emph{Reddito Pro-Capite:} \textasciitilde\$5.600 (vs
+  \textasciitilde\$15.000-\$18.000 dei Paesi UE)
+\item
+  \emph{Capacità Fiscale:} Limitate risorse pubbliche per integrazione
+\item
+  \emph{Contesto Geopolitico:} Pressione russa diretta (Transnistria)
+\item
+  \emph{Instabilità Pre-Guerra:} Già paese di orgine migratoria
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Lo Shock Macroeconomico: Dinamiche
+dell'Inflazione}\label{lo-shock-macroeconomico-dinamiche-dellinflazione}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{banche_dati_files/figure-pdf/plot_inflazione-1.pdf}
+\end{center}
+
+\textbf{Inflazione Divergente}: Prezzi più alti nei paesi confinanti
+rispetto alla media UE per shock da domanda.
+
+\textbf{Shock dell'Ucraina}: Inflazione estrema causata da svalutazione
+e crollo della capacità produttiva causate dalla guerra.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Dinamiche di Crescita: Confinanti vs Resto
+d'Europa}\label{dinamiche-di-crescita-confinanti-vs-resto-deuropa}
+
+Oltre all'inflazione, analizziamo la variazione della \textbf{crescita
+del PIL reale} passando dal periodo pre-guerra allo shock del 2022.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(df\_groups, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ crescita\_pil, }\AttributeTok{color =}\NormalTok{ Gruppo)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept =} \DecValTok{2022}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{geom\_label}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \DecValTok{2022}\NormalTok{, }\AttributeTok{y =} \FunctionTok{max}\NormalTok{(df\_groups}\SpecialCharTok{$}\NormalTok{crescita\_pil, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{label =} \StringTok{"Inizio Guerra (2022)"}\NormalTok{),}
+             \AttributeTok{size =} \FloatTok{4.5}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{fontface =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"white"}\NormalTok{, }\AttributeTok{label.size =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{linewidth =} \FloatTok{1.3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Ucraina"} \OtherTok{=} \StringTok{"\#A82925"}\NormalTok{,          }\CommentTok{\# Rosso Unibo}
+    \StringTok{"Paesi Confinanti"} \OtherTok{=} \StringTok{"\#555555"}\NormalTok{, }\CommentTok{\# Grigio scuro}
+    \StringTok{"Resto d\textquotesingle{}Europa"} \OtherTok{=} \StringTok{"\#0072B2"}    \CommentTok{\# Blu accademico}
+\NormalTok{  )) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{12}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Crescita del PIL Media (\%)"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Anno"}\NormalTok{, }\AttributeTok{y =} \StringTok{"\% PIL"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Warning: Use of `df_groups$crescita_pil` is discouraged.
+i Use `crescita_pil` instead.
+\end{verbatim}
+
+\begin{verbatim}
+Warning in geom_label(aes(x = 2022, y = max(df_groups$crescita_pil, na.rm = TRUE), : All aesthetics have length 1, but the data has 47 rows.
+i Please consider using `annotate()` or provide this layer with data containing
+  a single row.
+\end{verbatim}
+
+\begin{verbatim}
+Warning: Removed 2 rows containing missing values or values outside the scale range
+(`geom_line()`).
+\end{verbatim}
+
+\begin{center}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{banche_dati_files/figure-pdf/plot_pil_gruppi-1.pdf}
+\end{center}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Statistiche Descrittive: Macroeconomia
+(2014-2024)}\label{statistiche-descrittive-macroeconomia-2014-2024}
+
+\centering \textbf{Crescita PIL (\%)}
+
+\begin{table}
+\centering\begingroup\fontsize{6}{8}\selectfont
+
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{ll>{}rrrr}
+\toprule
+Gruppo & periodo & Media & SD & Min & Max\\
+\midrule
+\cellcolor{gray!10}{Conf.} & \cellcolor{gray!10}{Post-guerra} & \textcolor{black}{\textbf{\cellcolor{gray!10}{1.4}}} & \cellcolor{gray!10}{2.4} & \cellcolor{gray!10}{-4.6} & \cellcolor{gray!10}{5.3}\\
+Conf. & Pre-guerra & \textcolor{black}{\textbf{3.5}} & 3.7 & -8.3 & 13.9\\
+\cellcolor{gray!10}{Resto} & \cellcolor{gray!10}{Post-guerra} & \textcolor{black}{\textbf{\cellcolor{gray!10}{2.1}}} & \cellcolor{gray!10}{2.5} & \cellcolor{gray!10}{-2.7} & \cellcolor{gray!10}{10.6}\\
+Resto & Pre-guerra & \textcolor{black}{\textbf{2.5}} & 4.1 & -10.9 & 24.6\\
+\cellcolor{gray!10}{UKR} & \cellcolor{gray!10}{Post-guerra} & \textcolor{red}{\textbf{\cellcolor{gray!10}{-6.8}}} & \cellcolor{gray!10}{19.1} & \cellcolor{gray!10}{-28.8} & \cellcolor{gray!10}{5.5}\\
+\addlinespace
+UKR & Pre-guerra & \textcolor{red}{\textbf{-1.1}} & 5.9 & -10.1 & 3.5\\
+\bottomrule
+\end{tabular}}
+\endgroup{}
+\end{table}
+
+\centering \textbf{Inflazione (\%)}
+
+\begin{table}
+\centering\begingroup\fontsize{6}{8}\selectfont
+
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{llrrrr}
+\toprule
+Gruppo & periodo & Media & SD & Min & Max\\
+\midrule
+\cellcolor{gray!10}{Conf.} & \cellcolor{gray!10}{Post-guerra} & \cellcolor{gray!10}{11.2} & \cellcolor{gray!10}{6.7} & \cellcolor{gray!10}{2.8} & \cellcolor{gray!10}{28.7}\\
+Conf. & Pre-guerra & 2.5 & 2.4 & -1.5 & 9.7\\
+\cellcolor{gray!10}{Resto} & \cellcolor{gray!10}{Post-guerra} & \cellcolor{gray!10}{6.0} & \cellcolor{gray!10}{4.1} & \cellcolor{gray!10}{0.7} & \cellcolor{gray!10}{19.7}\\
+Resto & Pre-guerra & 1.1 & 1.2 & -2.1 & 4.7\\
+\cellcolor{gray!10}{UKR} & \cellcolor{gray!10}{Post-guerra} & \cellcolor{gray!10}{13.2} & \cellcolor{gray!10}{6.8} & \cellcolor{gray!10}{6.5} & \cellcolor{gray!10}{20.2}\\
+\addlinespace
+UKR & Pre-guerra & 15.0 & 14.1 & 2.7 & 48.7\\
+\bottomrule
+\end{tabular}}
+\endgroup{}
+\end{table}
+
+\scriptsize
+
+\begin{itemize}
+\item
+  \textbf{Contrazione in Ucraina}: Nel post-2022 l'Ucraina affronta una
+  recessione profonda, con il PIL che crolla mediamente del -6,8\% (un
+  peggioramento netto rispetto al -1,1\% del periodo pre-guerra).
+  L'inflazione media si attesta al 13,2\%, confermando un'economia di
+  guerra sotto stress estremo a causa della distruzione delle capacità
+  produttive.
+\item
+  \textbf{Shock Asimmetrico in Europa}: I paesi confinanti vedono la
+  propria crescita rallentare all'1,4\% (dal 3,5\% precedente), subendo
+  al contempo un'impennata inflattiva dell'11,2\%. Questo aumento dei
+  prezzi è quasi il doppio rispetto al 6,0\% registrato nel resto
+  d'Europa, evidenziando una pressione economica molto più marcata per
+  chi si trova in ``prima linea''.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Test di Ipotesi: PIL tra Confinanti e Non
+Confinanti}\label{test-di-ipotesi-pil-tra-confinanti-e-non-confinanti}
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{8}{10}\selectfont
+
+\begin{tabular}{lc}
+\toprule
+Statistica & Valore\\
+\midrule
+\cellcolor{gray!10}{Media Confinanti} & \cellcolor{gray!10}{18397.6000}\\
+Media Non Confinanti & 50352.1000\\
+\cellcolor{gray!10}{Differenza} & \cellcolor{gray!10}{-31954.5000}\\
+\textbf{t-statistic} & \textbf{-8.5836}\\
+\textbf{\cellcolor{gray!10}{Gradi libertà}} & \textbf{\cellcolor{gray!10}{88.5000}}\\
+\addlinespace
+\textbf{p-value} & \textbf{0.0000}\\
+\cellcolor{gray!10}{IC 95\% inf} & \cellcolor{gray!10}{-39352.1000}\\
+IC 95\% sup & -24556.9000\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\begin{center}
+$H_0$: $\mu_{conf} = \mu_{non-conf}$ \quad $H_1$: $\mu_{conf} \neq \mu_{non-conf}$
+\end{center}
+
+\vspace{0.2cm}
+\scriptsize
+
+\textbf{Conclusione:} Con t = -8.58 e p-value = 0.0000
+\textbf{rifiutiamo $H_0$} con altissima confidenza. I paesi confinanti
+mostrano un PIL pro capite medio di \$18.397, contro \$50.352 del resto
+d'Europa: una differenza di circa \$32.000 statisticamente
+significativa. Questo risultato va a riflettere
+\textcolor{beamer@main}{\textbf{la disparità economica tra le due aree, con la prossimità geografica alla zona di conflitto che coincide con regioni caratterizzate da livelli di benessere economico inferiori.}}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Test di Ipotesi: Inflazione tra Confinanti e Non
+Confinanti}\label{test-di-ipotesi-inflazione-tra-confinanti-e-non-confinanti}
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{8}{10}\selectfont
+
+\begin{tabular}{lc}
+\toprule
+Statistica & Valore\\
+\midrule
+\cellcolor{gray!10}{Media Confinanti} & \cellcolor{gray!10}{11.2000}\\
+Media Non Confinanti & 5.9700\\
+\cellcolor{gray!10}{Differenza} & \cellcolor{gray!10}{5.2300}\\
+\textbf{t-statistic} & \textbf{2.9067}\\
+\textbf{\cellcolor{gray!10}{Gradi libertà}} & \textbf{\cellcolor{gray!10}{16.1000}}\\
+\addlinespace
+\textbf{p-value} & \textbf{0.0103}\\
+\cellcolor{gray!10}{IC 95\% inf} & \cellcolor{gray!10}{1.4200}\\
+IC 95\% sup & 9.0500\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\begin{center}
+$H_0$: $\mu_{conf} = \mu_{non-conf}$ \quad $H_1$: $\mu_{conf} \neq \mu_{non-conf}$
+\end{center}
+
+\vspace{0.2cm}
+\scriptsize
+
+\textbf{Conclusione:} Con t = 2.91 e p-value = 0.0103
+\textbf{rifiutiamo $H_0$}. I paesi confinanti hanno registrato
+un'inflazione media dell'11.2\%, contro il 5.97\% del resto d'Europa:
+una differenza di 5.23 punti percentuali statisticamente significativa,
+confermando che
+\textcolor{beamer@main}{\textbf{lo shock inflattivo è stato asimmetrico e più intenso per chi si trovava in prima linea geografica.}}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Test di Ipotesi: Crescita PIL Pre vs Post
+Guerra}\label{test-di-ipotesi-crescita-pil-pre-vs-post-guerra}
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{8}{10}\selectfont
+
+\begin{tabular}{llc}
+\toprule
+Gruppo & Statistica & Valore\\
+\midrule
+\addlinespace[0.3em]
+\multicolumn{3}{l}{\textbf{Confinanti: Pre vs Post-guerra}}\\
+\hspace{1em}\cellcolor{gray!10}{Confinanti} & \cellcolor{gray!10}{t-statistic} & \cellcolor{gray!10}{2.4271}\\
+\hspace{1em}Confinanti & p-value & 0.0199\\
+\hspace{1em}\cellcolor{gray!10}{Confinanti} & \cellcolor{gray!10}{Differenza media} & \cellcolor{gray!10}{2.0700}\\
+\addlinespace[0.3em]
+\multicolumn{3}{l}{\textbf{Resto Europa: Pre vs Post-guerra}}\\
+\hspace{1em}Resto Europa & t-statistic & 0.9981\\
+\hspace{1em}\cellcolor{gray!10}{Resto Europa} & \cellcolor{gray!10}{p-value} & \cellcolor{gray!10}{0.3193}\\
+\hspace{1em}Resto Europa & Differenza media & 0.4000\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\begin{center}
+$H_0$: $\mu_{pre} = \mu_{post}$ \quad $H_1$: $\mu_{pre} \neq \mu_{post}$
+\end{center}
+
+\vspace{0.2cm}
+\scriptsize
+
+\textbf{Conclusione:} I risultati sono asimmetrici. Per i \textbf{paesi
+confinanti} (t = 2.43, p = 0.0199) \textbf{rifiutiamo \(H_0\)}: emerge
+una differenza statisticamente significativa tra la crescita media del
+PIL pre e post guerra, pari a circa 2.07 punti percentuali. Per il
+\textbf{resto d'Europa} (t = 1.00, p = 0.3193) \textbf{non rifiutiamo
+\(H_0\)}: non emerge una differenza statisticamente significativa tra i
+due periodi.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Test d'Ipotesi: Rottura Strutturale nel
+2022}\label{test-dipotesi-rottura-strutturale-nel-2022}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#| echo: false}
+\CommentTok{\#| message: false}
+\CommentTok{\#| warning: false}
+
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(knitr)}
+\FunctionTok{library}\NormalTok{(kableExtra)}
+\FunctionTok{library}\NormalTok{(here)}
+
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\FunctionTok{here}\NormalTok{(}\StringTok{"DATA/PROCESSED/dataset\_finale\_integrato.csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Rows: 511 Columns: 11
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr (3): iso3, Country, periodo
+dbl (8): Year, Refugees, Total_Fatalities, Civilian_Fatalities, GDP_per_capi...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Separiamo pre{-}2022 e post{-}2022}
+\NormalTok{pre\_2022 }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Year }\SpecialCharTok{\textless{}} \DecValTok{2022}\NormalTok{, Year }\SpecialCharTok{\textgreater{}=} \DecValTok{2018}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Refugees, Total\_Fatalities, inflazione) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{na.omit}\NormalTok{()}
+
+\NormalTok{post\_2022 }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Year }\SpecialCharTok{\textgreater{}=} \DecValTok{2022}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Refugees, Total\_Fatalities, inflazione) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{na.omit}\NormalTok{()}
+
+\CommentTok{\# Test t per rifugiati}
+\NormalTok{test\_rif }\OtherTok{\textless{}{-}} \FunctionTok{t.test}\NormalTok{(pre\_2022}\SpecialCharTok{$}\NormalTok{Refugees, post\_2022}\SpecialCharTok{$}\NormalTok{Refugees, }\AttributeTok{var.equal =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Test t per vittime}
+\NormalTok{test\_vit }\OtherTok{\textless{}{-}} \FunctionTok{t.test}\NormalTok{(pre\_2022}\SpecialCharTok{$}\NormalTok{Total\_Fatalities, post\_2022}\SpecialCharTok{$}\NormalTok{Total\_Fatalities, }\AttributeTok{var.equal =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Test t per inflazione}
+\NormalTok{test\_inf }\OtherTok{\textless{}{-}} \FunctionTok{t.test}\NormalTok{(pre\_2022}\SpecialCharTok{$}\NormalTok{inflazione, post\_2022}\SpecialCharTok{$}\NormalTok{inflazione, }\AttributeTok{var.equal =} \ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\# Tabella risultati}
+\NormalTok{results }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{Variabile =} \FunctionTok{c}\NormalTok{(}\StringTok{"Rifugiati"}\NormalTok{, }\StringTok{"Vittime"}\NormalTok{, }\StringTok{"Inflazione (\%)"}\NormalTok{),}
+  \AttributeTok{Media\_Pre =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(pre\_2022}\SpecialCharTok{$}\NormalTok{Refugees, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{0}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(pre\_2022}\SpecialCharTok{$}\NormalTok{Total\_Fatalities, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{0}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(pre\_2022}\SpecialCharTok{$}\NormalTok{inflazione, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\NormalTok{  ),}
+  \AttributeTok{Media\_Post =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(post\_2022}\SpecialCharTok{$}\NormalTok{Refugees, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{0}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(post\_2022}\SpecialCharTok{$}\NormalTok{Total\_Fatalities, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{0}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(post\_2022}\SpecialCharTok{$}\NormalTok{inflazione, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\NormalTok{  ),}
+  \AttributeTok{t\_stat =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{round}\NormalTok{(test\_rif}\SpecialCharTok{$}\NormalTok{statistic, }\DecValTok{3}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(test\_vit}\SpecialCharTok{$}\NormalTok{statistic, }\DecValTok{3}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(test\_inf}\SpecialCharTok{$}\NormalTok{statistic, }\DecValTok{3}\NormalTok{)}
+\NormalTok{  ),}
+  \AttributeTok{p\_value =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{round}\NormalTok{(test\_rif}\SpecialCharTok{$}\NormalTok{p.value, }\DecValTok{4}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(test\_vit}\SpecialCharTok{$}\NormalTok{p.value, }\DecValTok{4}\NormalTok{),}
+    \FunctionTok{round}\NormalTok{(test\_inf}\SpecialCharTok{$}\NormalTok{p.value, }\DecValTok{4}\NormalTok{)}
+\NormalTok{  ),}
+  \AttributeTok{Sig =} \FunctionTok{c}\NormalTok{(}
+    \FunctionTok{if\_else}\NormalTok{(test\_rif}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.001}\NormalTok{, }\StringTok{"***"}\NormalTok{, }
+            \FunctionTok{if\_else}\NormalTok{(test\_rif}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.01}\NormalTok{, }\StringTok{"**"}\NormalTok{, }
+                    \FunctionTok{if\_else}\NormalTok{(test\_rif}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.05}\NormalTok{, }\StringTok{"*"}\NormalTok{, }\StringTok{""}\NormalTok{))),}
+    \FunctionTok{if\_else}\NormalTok{(test\_vit}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.001}\NormalTok{, }\StringTok{"***"}\NormalTok{, }
+            \FunctionTok{if\_else}\NormalTok{(test\_vit}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.01}\NormalTok{, }\StringTok{"**"}\NormalTok{, }
+                    \FunctionTok{if\_else}\NormalTok{(test\_vit}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.05}\NormalTok{, }\StringTok{"*"}\NormalTok{, }\StringTok{""}\NormalTok{))),}
+    \FunctionTok{if\_else}\NormalTok{(test\_inf}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.001}\NormalTok{, }\StringTok{"***"}\NormalTok{, }
+            \FunctionTok{if\_else}\NormalTok{(test\_inf}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.01}\NormalTok{, }\StringTok{"**"}\NormalTok{, }
+                    \FunctionTok{if\_else}\NormalTok{(test\_inf}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textless{}} \FloatTok{0.05}\NormalTok{, }\StringTok{"*"}\NormalTok{, }\StringTok{""}\NormalTok{)))}
+\NormalTok{  )}
+\NormalTok{)}
+
+\FunctionTok{kable}\NormalTok{(results, }\AttributeTok{format =} \StringTok{"latex"}\NormalTok{, }\AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Variabile"}\NormalTok{, }\StringTok{"Media Pre{-}2022"}\NormalTok{, }\StringTok{"Media Post{-}2022"}\NormalTok{, }
+                    \StringTok{"t{-}stat"}\NormalTok{, }\StringTok{"p{-}value"}\NormalTok{, }\StringTok{"Sig."}\NormalTok{),}
+      \AttributeTok{align =} \StringTok{"lcccccc"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{), }\AttributeTok{font\_size =} \DecValTok{7}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{row\_spec}\NormalTok{(}\DecValTok{0}\NormalTok{, }\AttributeTok{bold =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{7}{9}\selectfont
+
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Variabile} & \textbf{Media Pre-2022} & \textbf{Media Post-2022} & \textbf{t-stat} & \textbf{p-value} & \textbf{Sig.}\\
+\midrule
+\cellcolor{gray!10}{Rifugiati} & \cellcolor{gray!10}{374.00} & \cellcolor{gray!10}{146067.00} & \cellcolor{gray!10}{-5.652} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{***}\\
+Vittime & 384.00 & 49850.00 & -33.502 & 0 & ***\\
+\cellcolor{gray!10}{Inflazione (\%)} & \cellcolor{gray!10}{1.86} & \cellcolor{gray!10}{6.81} & \cellcolor{gray!10}{-9.307} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{***}\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\begin{center}
+$H_0$: $\mu_{pre-2022} = \mu_{post-2022}$ \quad $H_1$: $\mu_{pre-2022} \neq \mu_{post-2022}$
+\end{center}
+
+\vspace{0.3cm}
+
+\small
+
+Il test d'ipotesi conferma una \textbf{rottura strutturale simultanea
+nel 2022} su tre dimensioni critiche: il numero medio di rifugiati è
+esploso da \textasciitilde11.000 a \textasciitilde4.4 milioni
+(p\textless0.001), le vittime di conflitto sono salite da
+\textasciitilde386 a \textasciitilde52.849 (p\textless0.001), e
+l'inflazione media europea è quasi quadruplicata dal 2.1\% all'8.4\%
+(p\textless0.001). Tutti e tre i test rifiutano l'ipotesi nulla con
+altissima significatività statistica, evidenziando che
+\textbf{l'invasione dell'Ucraina non rappresenta uno shock graduale, ma
+un event simultaneo che ha alterato contemporaneamente flussi migratori,
+intensità bellica e stabilità dei prezzi}.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Modello di Regressione:}\label{modello-di-regressione}
+
+Per testare l'impatto asimmetrico dello shock, stimiamo il seguente
+modello lineare con effetti di interazione:
+
+\vspace{0.1cm}
+\scriptsize
+
+\[Y_{it} = \beta_0 + \beta_1 \Delta R_{it} + \beta_2 C_i + \beta_3 T_t + \beta_4 (C_i \times T_t)+\]
+\[+ \beta_5 (\Delta R_{it} \times T_t) + \beta_6 INF_{it} + \beta_7 FAT_{it} + \beta_8 \frac{1}{Dist_{i}} + \epsilon_{it}\]
+\normalsize \vspace{0.1cm}
+
+\begin{table}
+\centering\begingroup\fontsize{6.5}{8.5}\selectfont
+
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{clcc}
+\toprule
+\textbf{Variabile} & \textbf{Descrizione} & \textbf{Tipo} & \textbf{Fonte}\\
+\midrule
+\cellcolor{gray!10}{$Y_{it}$} & \cellcolor{gray!10}{PIL pro capite (USD correnti)} & \cellcolor{gray!10}{Continua} & \cellcolor{gray!10}{World Bank}\\
+\textbf{$\Delta R_{it}$} & \textbf{Flusso migratorio annuo (\textit{delta} rifugiati)} & \textbf{Continua} & \textbf{UNHCR}\\
+\cellcolor{gray!10}{$C_i$} & \cellcolor{gray!10}{Dummy paesi confinanti (1/0)} & \cellcolor{gray!10}{Dummy} & \cellcolor{gray!10}{-}\\
+$T_t$ & Dummy post-guerra ($t \ge 2022$) & Dummy & -\\
+\cellcolor{gray!10}{$C_i \times T_t$} & \cellcolor{gray!10}{Interazione: confinanza $\times$ post-guerra} & \cellcolor{gray!10}{Interazione} & \cellcolor{gray!10}{-}\\
+\addlinespace
+$\Delta R_{it} \times T_t$ & Interazione: flusso migratorio $\times$ post-guerra & Interazione & -\\
+\cellcolor{gray!10}{$INF_{it}$} & \cellcolor{gray!10}{Tasso di inflazione (\%)} & \cellcolor{gray!10}{Continua} & \cellcolor{gray!10}{World Bank}\\
+$FAT_{it}$ & Vittime totali di conflitto & Continua & ACLED\\
+\textbf{\cellcolor{gray!10}{$1/Dist_i$}} & \textbf{\cellcolor{gray!10}{Distanza inversa da Kyiv (effetto gravità)}} & \textbf{\cellcolor{gray!10}{Continua}} & \textbf{\cellcolor{gray!10}{CEPII}}\\
+$\epsilon_{it}$ & Termine di errore & - & -\\
+\bottomrule
+\end{tabular}}
+\endgroup{}
+\end{table}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Risultati del Modello OLS}\label{risultati-del-modello-ols}
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{7}{9}\selectfont
+
+\begin{tabular}{lrrrrl}
+\toprule
+\textbf{Variabile} & \textbf{Stima} & \textbf{Std. Error} & \textbf{t-stat} & \textbf{p-value} & \textbf{}\\
+\midrule
+\cellcolor{gray!10}{Intercetta} & \cellcolor{gray!10}{60398.438} & \cellcolor{gray!10}{4324.163} & \cellcolor{gray!10}{13.968} & \cellcolor{gray!10}{0.000} & \cellcolor{gray!10}{***}\\
+$\Delta R_{it}$ & 0.472 & 6.518 & 0.072 & 0.942 & \\
+\cellcolor{gray!10}{$C_i$} & \cellcolor{gray!10}{-12472.859} & \cellcolor{gray!10}{7826.110} & \cellcolor{gray!10}{-1.594} & \cellcolor{gray!10}{0.113} & \cellcolor{gray!10}{}\\
+$T_t$ & 21878.951 & 14923.181 & 1.466 & 0.144 & \\
+\cellcolor{gray!10}{$C_i \times T_t$} & \cellcolor{gray!10}{3454.051} & \cellcolor{gray!10}{10562.757} & \cellcolor{gray!10}{0.327} & \cellcolor{gray!10}{0.744} & \cellcolor{gray!10}{}\\
+\addlinespace
+$\Delta R_{it} \times T_t$ & -0.471 & 6.518 & -0.072 & 0.942 & \\
+\cellcolor{gray!10}{$INF_{it}$} & \cellcolor{gray!10}{-1442.498} & \cellcolor{gray!10}{759.550} & \cellcolor{gray!10}{-1.899} & \cellcolor{gray!10}{0.059} & \cellcolor{gray!10}{.}\\
+$FAT_{it}$ & -0.199 & 0.243 & -0.817 & 0.415 & \\
+\cellcolor{gray!10}{$1/Dist_i$} & \cellcolor{gray!10}{-18667197.879} & \cellcolor{gray!10}{5448837.892} & \cellcolor{gray!10}{-3.426} & \cellcolor{gray!10}{0.001} & \cellcolor{gray!10}{***}\\
+\bottomrule
+\multicolumn{6}{l}{\rule{0pt}{1em}Signif.: *** p$<$0.001,  ** p$<$0.01,  * p$<$0.05 . p$<$0.1}\\
+\end{tabular}
+\endgroup{}
+\end{table}
+
+\vspace{0.2cm}
+\scriptsize
+
+\textbf{R-quadro:} 0.2465 \quad \textbf{R-quadro Adj.:} 0.2159 \quad
+\textbf{N:} 206
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Interpretazione del modello
+OLS}\label{interpretazione-del-modello-ols}
+
+L'analisi rivela che \emph{la distanza da Kyiv è il fattore
+determinante}, confermando che i paesi confinanti subiscono una ``zona
+di depressione economica''. Tuttavia, l'effetto non è diretto dalla
+prossimità geografica, bensì \emph{mediato dall'inflazione}. I flussi
+migratori in sé e l'intensità del conflitto non risultano significativi.
+
+\textbf{Conclusione}: lo shock economico della guerra non opera
+attraverso un meccanismo di ``border penalty'' diretto, ma attraverso
+l'onere inflattivo che i paesi di frontiera hanno subito nel gestire
+l'afflusso massiccio di rifugiati. Il modello spiega il 24.65\% della
+varianza, suggerendo che altri fattori rimangono rilevanti.
+
+
+
+
+\end{document}
